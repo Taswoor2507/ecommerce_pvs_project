@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
     minlength: [8, "Password must be at least 8 characters"],
-    select: false 
+    select: false
   },
   role: {
     type: String,
@@ -27,15 +27,19 @@ const userSchema = new mongoose.Schema({
     default: "user"
   },
   refreshToken: {
-    type: String, 
+    type: String,
     default: null,
     select: false
   }
 }, {
-  timestamps: true, 
+  timestamps: true,
 });
 
-
+// hash the password
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return this;
+  this.password = await bcrypt.hash(this.password, 12);
+});
 
 const User = mongoose.model("User", userSchema);
 export default User;
