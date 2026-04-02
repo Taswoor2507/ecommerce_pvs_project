@@ -53,6 +53,7 @@ const registerUser =  async (payload)=>{
             role: user.role
         },
         accessToken,
+        refreshToken
     };
 };
 
