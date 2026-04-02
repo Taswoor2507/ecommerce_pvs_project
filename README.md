@@ -17,6 +17,8 @@ FRONTEND_URL= http://localhost:***8
 NODE_ENV = "development"
 MONGO_URI = "mongodb://localhost:*****/"
 DB_NAME = "****"
+ACCESS_TOKEN_SECRET= "your_secret"
+REFRESH_TOKEN_SECRET ="your_secret"
 ```
 
 ### Backend 
