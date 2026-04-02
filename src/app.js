@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { CONSTANTS } from './constants.js';
+import { CONSTANTS } from './config/constants.js';
 
 const app = express();
 // CORS
@@ -21,7 +21,5 @@ app.use(express.urlencoded({ limit: '20kb', extended: true }));
 
 // Cookie parser
 app.use(cookieParser());
-
-
 
 export default app;
