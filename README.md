@@ -12,12 +12,11 @@ Before starting the backend, create a `.env` file inside `server/` folder and ad
 
 ```env
 # Backend (.env)
-PORT=5000
-DB_HOST=localhost
-DB_USER=your_db_user
-DB_PASS=your_db_password
-DB_NAME=ecommerce_db
-JWT_SECRET=your_jwt_secret
+PORT= ****
+FRONTEND_URL= http://localhost:***8
+NODE_ENV = "development"
+MONGO_URI = "mongodb://localhost:*****/"
+DB_NAME = "****"
 ```
 
 ### Backend 

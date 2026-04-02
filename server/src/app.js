@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { CONSTANTS } from './config/constants.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { authRouter } from './modules/auth/auth.route.js';
 
 const app = express();
 // CORS
@@ -21,5 +23,10 @@ app.use(express.urlencoded({ limit: '20kb', extended: true }));
 
 // Cookie parser
 app.use(cookieParser());
+
+// Module Routes 
+app.use("/api/v1/auth" , authRouter);
+//error middleware
+app.use(errorHandler);
 
 export default app;
