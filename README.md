@@ -25,3 +25,17 @@ REFRESH_TOKEN_SECRET ="your_secret"
 1. ```cd server```
 2. ```npm install``` 
 3. ```npm run dev```
+
+## Auth Routes
+> #### Register user 
+1. ``` localhost:8080/api/v1/register  ```
+    ##### Payload
+    1. ``` name ```
+    2. ``` email ```
+    3. ``` password (HINT:Password must be at least 8 characters long, include at least one uppercase letter and one special character (e.g., Pass@123). )```
+> #### Login user 
+2. ``` localhost:8080/api/v1/login  ```
+    ##### Payload
+    1. ``` name ```
+    2. ``` email ```
+    3. ``` password```
