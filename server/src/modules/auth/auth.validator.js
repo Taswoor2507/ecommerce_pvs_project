@@ -14,10 +14,5 @@ export const registerSchema = z.object({
     .string({ required_error: "Password is required" })
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character"),
-  contact: z
-    .string()
-    .trim()
-    .max(20, "Contact must be less than 20 characters")
-    .optional()
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character")
 });
