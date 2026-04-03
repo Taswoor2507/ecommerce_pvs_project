@@ -3,6 +3,7 @@ import User from "../../models/user.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import { generateAccessToken , generateRefreshToken } from "../../utils/jwt.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 // Register user 
 const registerUserService =  async (payload)=>{
     const { name, email, password } = payload;
@@ -38,8 +39,8 @@ const registerUserService =  async (payload)=>{
     }
 
     // 3. Generate tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     // 4. Store refresh token in DB 
     user.refreshToken = refreshToken;
@@ -72,7 +73,7 @@ const registerUserService =  async (payload)=>{
     throw new ApiError( 401 , "Invalid or expired refresh token");
   }
 
-  const user = await User.findById(decoded.id);
+  const user = await User.findById(decoded.sub).select('+refreshToken');
 
   if (!user) {
     throw new ApiError( 404 , "User not found");

@@ -6,18 +6,18 @@ const ACCESS_TOKEN_SECRET = CONSTANTS.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = CONSTANTS.REFRESH_TOKEN_SECRET;
 
 // Generate Access Token
-export const generateAccessToken = (user) => {
+export const generateAccessToken = (userId) => {
     return jwt.sign(
-        { id: user._id, email: user.email }, 
+        { sub: userId }, 
         ACCESS_TOKEN_SECRET, 
         { expiresIn: "15m" }
     );
 };
 
 // Generate Refresh Token
-export const generateRefreshToken = (user) => {
+export const generateRefreshToken = (userId) => {
     return jwt.sign(
-        { id: user._id, email: user.email }, 
+        { sub: userId }, 
         REFRESH_TOKEN_SECRET, 
         { expiresIn: "7d" }
     );
