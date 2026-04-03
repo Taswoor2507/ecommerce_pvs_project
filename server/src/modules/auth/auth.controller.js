@@ -1,9 +1,9 @@
 import { CONSTANTS } from "../../config/constants.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { loginUser, registerUser } from "./auth.service.js";
+import { loginUserService, registerUserService , refreshTokenService } from "./auth.service.js";
 
 const register = asyncHandler(async(req,res , next)=>{
-    const user = await registerUser(req.body);
+    const user = await registerUserService(req.body);
     res.status(201).json({
         success:true,
         message:"User registered successfully",
@@ -13,7 +13,7 @@ const register = asyncHandler(async(req,res , next)=>{
 
  const login= asyncHandler(async (req, res) => {
     const isProduction = CONSTANTS.NODE_ENV === "production";
-    const result = await loginUser(req.body);
+    const result = await loginUserService(req.body);
     // Secure cookie 
         res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
@@ -32,5 +32,28 @@ const register = asyncHandler(async(req,res , next)=>{
     });
 });
 
+// refresh token controller
+  const refreshToken = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies?.refreshToken;
 
-export {register ,  login};
+  const { accessToken, refreshToken: newRefreshToken } = await refreshTokenService(refreshToken);
+
+  //  set refresh token in cookies 
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: CONSTANTS.NODE_ENV === "production",
+    sameSite: "Strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Token refreshed",
+    data: {
+      accessToken, 
+    },
+  });
+});
+
+
+export {register ,  login , refreshToken};

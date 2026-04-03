@@ -1,9 +1,10 @@
+import { CONSTANTS } from "../../config/constants.js";
 import User from "../../models/user.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import { generateAccessToken , generateRefreshToken } from "../../utils/jwt.js";
 import bcrypt from "bcryptjs";
 // Register user 
-const registerUser =  async (payload)=>{
+const registerUserService =  async (payload)=>{
     const { name, email, password } = payload;
     // check user exist or not
     const existingUser = await User.findOne({ email });
@@ -21,7 +22,7 @@ const registerUser =  async (payload)=>{
 }
 
 // login user
- const loginUser = async (payload) => {
+ const loginUserService = async (payload) => {
     const { email, password } = payload;
 
     // 1. Check user exists
@@ -58,4 +59,48 @@ const registerUser =  async (payload)=>{
 };
 
 
-export {registerUser , loginUser};
+//refresh token
+ const refreshTokenService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new ApiError( 401 , "Refresh token missing");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, CONSTANTS.REFRESH_TOKEN_SECRET);
+  } catch (err) {
+    throw new ApiError( 401 , "Invalid or expired refresh token");
+  }
+
+  const user = await User.findById(decoded.id);
+
+  if (!user) {
+    throw new ApiError( 404 , "User not found");
+  }
+
+  if (!user.refreshToken) {
+    throw new ApiError( 401 , "User not logged in");
+  }
+
+  //  MATCH WITH DB 
+  if (user.refreshToken !== refreshToken) {
+    throw new ApiError( 403 , "Refresh token mismatch");
+  }
+
+  // Generate new tokens
+  const newAccessToken = generateAccessToken(user._id);
+  const newRefreshToken = generateRefreshToken(user._id);
+
+  //  UPDATE refresh token 
+  user.refreshToken = newRefreshToken;
+  await user.save({ validateBeforeSave: false });
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+};
+
+
+
+export {registerUserService , loginUserService, refreshTokenService};
