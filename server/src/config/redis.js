@@ -32,7 +32,7 @@ if (!REDIS_DISABLED) {
   redis.on('error',        (err) => {
     console.error('❌ Redis error:', err.message);
     // In development, don't crash if Redis is not available
-    if (CONS.NODE_ENV !== 'production') {
+    if (CONSTANTS.NODE_ENV !== 'production') {
       console.warn('⚠️  Running without Redis cache (development mode)');
     }
   });
