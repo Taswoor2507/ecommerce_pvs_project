@@ -45,7 +45,6 @@ async function getProductWithVariants(productId) {
 
   const result = {
     ...product,
-    is_simple: product.variant_type_count === 0,
     variant_types: variantTypes.map((vt) => ({
       ...vt,
       options: optionsByType[vt._id.toString()] || [],

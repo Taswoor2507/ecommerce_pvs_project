@@ -10,4 +10,5 @@ export const CONSTANTS = {
     REFRESH_TOKEN_SECRET:process.env.REFRESH_TOKEN_SECRET,
     REDIS_HOST:process.env.REDIS_HOST,
     REDIS_PORT:process.env.REDIS_PORT,
+    REDIS_DISABLED:process.env.REDIS_DISABLED,
 }
