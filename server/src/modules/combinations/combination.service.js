@@ -1,9 +1,6 @@
 
 import mongoose from 'mongoose';
-import Combination from "../../models/combination.model.js"
-import VariantType from "../../models/variantType.model.js"
-import Option from "../../models/option.model.js"
-import Product from "../../models/product.model.js"
+import { VariantType, Combination , Option } from "../../models/index.js"
 import { ApiError } from '../../utils/apiError.js';
 
 // ── Hash helpers ──────────────────────────────────────────────────────────────

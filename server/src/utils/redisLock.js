@@ -7,9 +7,7 @@ const MAX_ATTEMPTS = 10;     // 10 * 500ms = 5 seconds max wait
 
 /**
  * Attempt to acquire a Redis distributed lock.
- * @param {string} key       Lock key (e.g. "lock:product:123:combinations")
- * @param {number} [ttlMs]   Lock TTL in milliseconds
- * @returns {string|null}    Lock value (to pass to releaseLock) or null if not acquired
+ 
  */
 async function acquireLock(key, ttlMs = LOCK_TTL_MS) {
   // Unique value so we only release OUR lock (not a lock held by someone else)
@@ -38,9 +36,6 @@ async function releaseLock(key, lockValue) {
 /**
  * Execute fn() while holding a product-level combination generation lock.
  * Retries acquiring the lock for up to 5 seconds before giving up.
- *
- * @param {string}   productId  MongoDB product ObjectId string
- * @param {Function} fn         Async function to execute inside the lock
  */
 async function withProductLock(productId, fn) {
   const lockKey   = `lock:product:${productId}:combinations`;
@@ -67,4 +62,4 @@ async function withProductLock(productId, fn) {
   }
 }
 
-module.exports = { withProductLock };
+export { withProductLock };

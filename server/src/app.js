@@ -5,6 +5,7 @@ import { CONSTANTS } from './config/constants.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { authRouter } from './modules/auth/auth.route.js';
 import { productRouter } from './modules/product/product.route.js';
+import variantRouter from './modules/Variant/variant.route.js';
 
 const app = express();
 // CORS
@@ -30,7 +31,8 @@ app.use(cookieParser());
 app.use("/api/v1/auth" , authRouter);
 // product router
 app.use("/api/v1/products" , productRouter); 
-
+//variant router
+app.use("/api/v1/products" , variantRouter);
 //error middleware
 app.use(errorHandler);
 

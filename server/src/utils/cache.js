@@ -1,9 +1,7 @@
 import redis from '../config/redis.js';
-import Product from '../models/product.model.js';
-import VariantType from '../models/variant_types.model.js';
-import Option from '../models/option.model.js';
+import { Product, VariantType, Option } from '../models/index.js';
 
-const CACHE_TTL = 300; // 5 minutes
+const CACHE_TTL = 300; // 5 minutes 
 
 /**
  * Get full product data (product + variant types + options, nested).
