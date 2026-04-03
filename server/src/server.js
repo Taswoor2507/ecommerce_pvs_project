@@ -2,41 +2,42 @@ import app from "./app.js";
 import mongoose from "mongoose";
 import { CONSTANTS } from "./config/constants.js";
 import { connectDB } from "./config/db.js";
+import redis from "./config/redis.js";
+const PORT = CONSTANTS.PORT || 5000;
 
-const PORT = CONSTANTS.PORT || 7070;
-const startServer = async () => {
+async function startServer() {
+  // Connect to MongoDB first — fail fast if it's down
+  await connectDB();
+
+  // Ping Redis to verify connection (non-fatal — see redis.js for graceful degradation)
   try {
-    //  Connect to MongoDB
-    await connectDB();
-
-    // Start Express server
-    const server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT} in ${CONSTANTS.NODE_ENV} mode`);
-    });
-
-    //  Graceful shutdown
-    const shutdown = async () => {
-      console.log(" Shutting down server...");
-      server.close(async () => {
-        console.log("HTTP server closed");
-        try {
-          await mongoose.connection.close();
-          console.log("MongoDB connection closed");
-          process.exit(0);
-        } catch (err) {
-          console.error("Error closing MongoDB connection:", err);
-          process.exit(1);
-        }
-      });
-    };
-
-    process.on("SIGINT", shutdown);   
-    process.on("SIGTERM", shutdown);  
-
+    await redis.ping();
+    console.log('✅ Redis connected');
   } catch (err) {
-    console.error("Failed to start server:", err);
-    process.exit(1);
+    console.warn('⚠️  Redis unavailable — caching and locking disabled:', err.message);
   }
-};
 
-startServer();
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT} [${process.env.NODE_ENV}]`);
+  });
+
+  // Graceful shutdown: close HTTP server then DB/Redis connections
+  const gracefulShutdown = async (signal) => {
+    console.log(`\n${signal} received — shutting down gracefully…`);
+    server.close(async () => {
+      const mongoose = require('mongoose');
+      await mongoose.connection.close();
+      await redis.quit();
+      console.log('✅ Connections closed. Goodbye.');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
+}
+
+startServer().catch((err) => {
+  console.error('❌ Failed to start server:', err);
+  process.exit(1);
+});
