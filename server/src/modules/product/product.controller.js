@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { createProductService , listProductsService } from "./product.service.js";
+import { createProductService , getProductService, listProductsService } from "./product.service.js";
 
 // create product controller
 const createProduct = asyncHandler(async (req, res) => {
@@ -22,4 +22,14 @@ const listProducts = asyncHandler(async (req, res) => {
     })
 })
 
-export { createProduct, listProducts };
+// Get single product controller
+const getProduct = asyncHandler(async (req, res) => {
+  const productData = await getProductService(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    data: productData,
+  });
+});
+
+export { createProduct, listProducts, getProduct };

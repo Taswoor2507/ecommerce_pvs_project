@@ -2,6 +2,8 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js"
 import Product from "../../models/product.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import ApiFeatures from "../../utils/ApiFeatures.js";
+import { getProductWithVariants } from "../../utils/cache.js";
+
 // create product service
 const createProductService = async (payload) => {
     const { name, description, base_price } = payload;
@@ -65,7 +67,19 @@ const listProductsService = async (queryParams) => {
 };
 
 
+// get product by id service
+const getProductService = async (productId) => {
+  const productData = await getProductWithVariants(productId);
+
+  if (!productData) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  return productData;
+};
 
 
 
-export { createProductService ,listProductsService};
+
+
+export { createProductService ,listProductsService , getProductService };

@@ -1,7 +1,7 @@
 import redis from '../config/redis.js';
-import Product from '../models/Product.js';
-import VariantType from '../models/VariantType.js';
-import Option from '../models/Option.js';
+import Product from '../models/product.model.js';
+import VariantType from '../models/variant_types.model.js';
+import Option from '../models/option.model.js';
 
 const CACHE_TTL = 300; // 5 minutes
 
