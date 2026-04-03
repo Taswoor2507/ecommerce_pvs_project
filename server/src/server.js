@@ -1,5 +1,5 @@
 import app from "./app.js";
-import mongoose from "mongoose";
+import {mongoose as mongodb} from "mongoose";
 import { CONSTANTS } from "./config/constants.js";
 import { connectDB } from "./config/db.js";
 import redis from "./config/redis.js";
@@ -25,7 +25,7 @@ async function startServer() {
   const gracefulShutdown = async (signal) => {
     console.log(`\n${signal} received — shutting down gracefully…`);
     server.close(async () => {
-      const mongoose = require('mongoose');
+      const mongoose = mongodb
       await mongoose.connection.close();
       await redis.quit();
       console.log('✅ Connections closed. Goodbye.');

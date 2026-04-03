@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { createProductService , getProductService, listProductsService, updateProductService } from "./product.service.js";
+import { createProductService , deleteProductService, getProductService, listProductsService, updateProductService } from "./product.service.js";
 
 // create product controller
 const createProduct = asyncHandler(async (req, res) => {
@@ -59,4 +59,15 @@ const updateProduct = asyncHandler(async (req, res) => {
   });
 });
 
-export { createProduct, listProducts, getProduct , updateProduct };
+// delete product controller 
+const deleteProduct = asyncHandler(async (req, res) => {
+  const result = await deleteProductService(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    message: result.message,
+  });
+});
+
+
+export { createProduct, listProducts, getProduct , updateProduct , deleteProduct };

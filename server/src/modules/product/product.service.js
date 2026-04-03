@@ -2,6 +2,8 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js"
 import Product from "../../models/product.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import ApiFeatures from "../../utils/ApiFeatures.js";
+import mongoose from "mongoose";
+import Combination from "../../models/combination.model.js";
 import { getProductWithVariants, invalidateProductCache } from "../../utils/cache.js";
 
 // create product service
@@ -144,4 +146,53 @@ const updateProductService = async (productId, payload) => {
   };
 };
 
-export { createProductService ,listProductsService , getProductService , updateProductService };
+
+
+// delete product service 
+const deleteProductService = async (productId) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1. Check product exists
+    const product = await Product.findOne({ _id: productId, is_active: true }).session(session);
+    if (!product) {
+      throw new ApiError(404, "Product not found");
+    }
+
+    // 2. Soft delete product
+    await Product.findByIdAndUpdate(
+      productId,
+      { is_active: false },
+      { session }
+    );
+
+    // 3. Soft delete related combinations
+    await Combination.updateMany(
+      { product_id: productId },
+      { is_active: false },
+      { session }
+    );
+
+    // 4. Commit transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    // 5. Invalidate cache
+    await invalidateProductCache(productId);
+
+    return {
+      message: "Product  deleted successfully"
+    };
+
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
+};
+
+
+
+
+export { createProductService ,listProductsService , getProductService , updateProductService , deleteProductService };
