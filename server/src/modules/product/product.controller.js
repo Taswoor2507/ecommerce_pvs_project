@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { createProductService , getProductService, listProductsService } from "./product.service.js";
+import { createProductService , getProductService, listProductsService, updateProductService } from "./product.service.js";
 
 // create product controller
 const createProduct = asyncHandler(async (req, res) => {
@@ -32,4 +32,31 @@ const getProduct = asyncHandler(async (req, res) => {
   });
 });
 
-export { createProduct, listProducts, getProduct };
+// Update product controller
+const updateProduct = asyncHandler(async (req, res) => {
+  const updatedProduct = await updateProductService(req.params.id, req.body);
+
+  // If no changes were made, return 200 with message
+  if (updatedProduct.message) {
+    return res.status(200).json({
+      success: true,
+      message: updatedProduct.message,
+      data: {
+        id: updatedProduct.id,
+        name: updatedProduct.name,
+        description: updatedProduct.description,
+        base_price: updatedProduct.base_price,
+        updatedAt: updatedProduct.updatedAt,
+      },
+    });
+  }
+
+  // Actual update occurred
+  res.status(200).json({
+    success: true,
+    message: "Product updated successfully",
+    data: updatedProduct,
+  });
+});
+
+export { createProduct, listProducts, getProduct , updateProduct };

@@ -2,7 +2,7 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js"
 import Product from "../../models/product.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import ApiFeatures from "../../utils/ApiFeatures.js";
-import { getProductWithVariants } from "../../utils/cache.js";
+import { getProductWithVariants, invalidateProductCache } from "../../utils/cache.js";
 
 // create product service
 const createProductService = async (payload) => {
@@ -79,7 +79,69 @@ const getProductService = async (productId) => {
 };
 
 
+// update product 
+const updateProductService = async (productId, payload) => {
+  const { name, description, base_price } = payload;
 
+  // First, get the current product to compare
+  const currentProduct = await Product.findOne({ _id: productId, is_active: true });
+  
+  if (!currentProduct) {
+    throw new ApiError(404, "Product not found");
+  }
 
+  // Check if any values are actually different
+  const hasChanges = 
+    (name !== undefined && name !== currentProduct.name) ||
+    (description !== undefined && description !== currentProduct.description) ||
+    (base_price !== undefined && base_price !== currentProduct.base_price);
 
-export { createProductService ,listProductsService , getProductService };
+  // If no actual changes, return current product without updating
+  if (!hasChanges) {
+    return {
+      id: currentProduct._id,
+      name: currentProduct.name,
+      description: currentProduct.description,
+      base_price: currentProduct.base_price,
+      updatedAt: currentProduct.updatedAt,
+      message: "No changes detected - product already up to date"
+    };
+  }
+
+  // Build update object only from changed fields
+  const update = {};
+  let cacheInvalidationNeeded = false;
+  
+  if (name !== undefined && name !== currentProduct.name) {
+    update.name = name;
+  }
+  if (description !== undefined && description !== currentProduct.description) {
+    update.description = description;
+  }
+  if (base_price !== undefined && base_price !== currentProduct.base_price) {
+    update.base_price = base_price;
+    cacheInvalidationNeeded = true;
+  }
+
+  // Only perform update if there are changes
+  const updatedProduct = await Product.findOneAndUpdate(
+    { _id: productId, is_active: true },
+    update,
+    { new: true, runValidators: true }
+  );
+
+  // Invalidate cache only if price actually changed
+  if (cacheInvalidationNeeded) {
+    await invalidateProductCache(productId);
+  }
+
+  return {
+    id: updatedProduct._id,
+    name: updatedProduct.name,
+    description: updatedProduct.description,
+    base_price: updatedProduct.base_price,
+    updatedAt: updatedProduct.updatedAt,
+  };
+};
+
+export { createProductService ,listProductsService , getProductService , updateProductService };
