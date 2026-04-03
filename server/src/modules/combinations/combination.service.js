@@ -125,13 +125,15 @@ async function generateCombinationsForProduct(productId, session) {
           // → preserves existing price/stock on already-existing combinations
           $setOnInsert: {
             product_id:       new mongoose.Types.ObjectId(productId),
-            options:          optionIds,
             additional_price: 0,
             stock:            0,
             option_labels:    labels,
           },
-          // $set: always runs — reactivates soft-deleted combinations
-          $set: { is_active: true },
+          // $set: always runs — ensures options array is always synchronized
+          $set: { 
+            is_active: true,
+            options: optionIds, // Always update options to ensure sync
+          },
         },
         upsert: true,
       },
@@ -258,12 +260,14 @@ async function generateCombinationsForNewOption(
         update: {
           $setOnInsert: {
             product_id:       new mongoose.Types.ObjectId(productId),
-            options:          optionIds,
             additional_price: 0,
             stock:            0,
             option_labels:    labels,
           },
-          $set: { is_active: true },
+          $set: { 
+            is_active: true,
+            options: optionIds, // Always update options to ensure sync
+          },
         },
         upsert: true,
       },
@@ -371,9 +375,50 @@ async function lookupCombination(productId, selection) {
   };
 }
 
+/**
+ * Validate and fix inconsistent combinations where options_hash doesn't match options array
+ * This can happen due to the bug we just fixed
+ */
+async function validateAndFixCombinations(productId, session) {
+  const inconsistentCombinations = await Combination.find({
+    product_id: productId,
+    is_active: true,
+  }).session(session || null);
+
+  let fixedCount = 0;
+  const bulkOps = [];
+
+  for (const combo of inconsistentCombinations) {
+    const expectedHash = buildHash(combo.options);
+    
+    if (combo.options_hash !== expectedHash) {
+      console.warn(`Found inconsistent combination: ${combo._id}`);
+      console.warn(`  Expected hash: ${expectedHash}`);
+      console.warn(`  Actual hash:   ${combo.options_hash}`);
+      console.warn(`  Options:       ${combo.options.map(id => id.toString()).join(', ')}`);
+      
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: combo._id },
+          update: { $set: { options_hash: expectedHash } },
+        },
+      });
+      fixedCount++;
+    }
+  }
+
+  if (bulkOps.length > 0) {
+    await Combination.bulkWrite(bulkOps, { session });
+    console.log(`Fixed ${fixedCount} inconsistent combinations for product ${productId}`);
+  }
+
+  return fixedCount;
+}
+
 export {
   generateCombinationsForProduct,
   generateCombinationsForNewOption,
   lookupCombination,
   buildHash,
+  validateAndFixCombinations,
 };
