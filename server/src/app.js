@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { CONSTANTS } from './config/constants.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { authRouter } from './modules/auth/auth.route.js';
+import { productRouter } from './modules/product/product.route.js';
 
 const app = express();
 // CORS
@@ -25,7 +26,11 @@ app.use(express.urlencoded({ limit: '20kb', extended: true }));
 app.use(cookieParser());
 
 // Module Routes 
+// auth router
 app.use("/api/v1/auth" , authRouter);
+// product router
+app.use("/api/v1/products" , productRouter); 
+
 //error middleware
 app.use(errorHandler);
 

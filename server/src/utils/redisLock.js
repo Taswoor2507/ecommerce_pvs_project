@@ -1,24 +1,3 @@
-// src/utils/redisLock.js
-// ─────────────────────────────────────────────────────────────────────────────
-// Distributed lock using Redis SET NX PX (Redlock pattern, single-node).
-//
-// WHY THIS IS NEEDED:
-//   Two admins simultaneously adding variant types to the same product would
-//   both read "current state", compute independent Cartesian products, and
-//   write conflicting/incomplete combinations. MongoDB transactions alone
-//   cannot prevent this because both transactions would read the same state
-//   before either writes.
-//
-//   The lock ensures only ONE combination-generation run executes per product
-//   at a time. The TTL (15s) guarantees the lock auto-expires if the server
-//   crashes while holding it — preventing permanent deadlock.
-//
-// LUA SCRIPT for release:
-//   We use a Lua script to atomically check+delete the lock. Without it,
-//   a race condition exists: check key == our value → CRASH → key expires →
-//   new owner gets lock → we wake up and delete their lock. The script makes
-//   check+delete atomic at the Redis server level.
-// ─────────────────────────────────────────────────────────────────────────────
 import redis from '../config/redis.js';
 import { ApiError } from './apiError.js';
 

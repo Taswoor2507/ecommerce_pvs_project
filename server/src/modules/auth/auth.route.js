@@ -6,10 +6,10 @@ const authRouter = Router();
 
 // Register route
 authRouter.route("/register").post(validate(registerSchema), register);
-export { authRouter };
 
 //Login route
 authRouter.route("/login").post(validate(loginSchema) , login)
 
 //refresh token 
 authRouter.route("/refresh-token").post(refreshToken);
+export { authRouter };
