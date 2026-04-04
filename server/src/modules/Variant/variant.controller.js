@@ -1,4 +1,4 @@
-import { addOptionService, addVariantTypeService } from './variant.service.js';
+import { addOptionService, addVariantTypeService, deleteVariantTypeService } from './variant.service.js';
 import { asyncHandler } from '../../middlewares/asyncHandler.js'; 
 
 
@@ -28,7 +28,7 @@ import { asyncHandler } from '../../middlewares/asyncHandler.js';
 });
 
 
-const addOptionController = asyncHandler(async (req, res) => {
+const addOption = asyncHandler(async (req, res) => {
   const { id: productId, vid: variantTypeId } = req.params;
   const { option } = req.body;
 
@@ -49,4 +49,23 @@ const addOptionController = asyncHandler(async (req, res) => {
 });
 
 
-export {addVariantType , addOptionController};
+//delete variant type controller 
+
+const deleteVariantType = asyncHandler(async (req, res) => {
+  const { id: productId, vid: variantTypeId } = req.params;
+
+  const { name, deactivated, newCombinationsGenerated } =
+    await deleteVariantTypeService(productId, variantTypeId);
+
+  res.json({
+    success: true,
+    data: {
+      message: `Variant type ${name} removed`,
+      combinations_deactivated: deactivated,
+      new_combinations_generated: newCombinationsGenerated,
+    },
+  });
+});
+
+
+export {addVariantType , addOption , deleteVariantType};

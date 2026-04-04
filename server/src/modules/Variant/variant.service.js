@@ -1,11 +1,13 @@
 import mongoose from 'mongoose';
-import { Product, VariantType, Option } from '../../models/index.js';
+import { Product, VariantType, Option ,  Combination } from '../../models/index.js';
 import { withProductLock } from '../../utils/redisLock.js';
 import { generateCombinationsForNewOption, generateCombinationsForProduct } from '../combinations/combination.service.js';
 import { invalidateProductCache } from '../../utils/cache.js';
 import { ApiError } from '../../utils/apiError.js';
 
- async function addVariantTypeService(productId, name, optionValues) {
+ 
+// add variant type service 
+async function addVariantTypeService(productId, name, optionValues) {
   // Verify product exists
   const product = await Product.findOne({ _id: productId, is_active: true });
   if (!product) throw new ApiError(404, 'Product not found');
@@ -108,7 +110,9 @@ import { ApiError } from '../../utils/apiError.js';
 
 
 
-const addOptionService = async (productId, variantTypeId, optionValue) => {
+// add option service 
+
+async function addOptionService (productId, variantTypeId, optionValue){
   // verify product + variant
   const [product, variantType] = await Promise.all([
     Product.findOne({ _id: productId, is_active: true }),
@@ -181,4 +185,82 @@ const addOptionService = async (productId, variantTypeId, optionValue) => {
 };
 
 
-export {addVariantTypeService ,  addOptionService};
+// delete variant type service 
+
+async function deleteVariantTypeService (productId, variantTypeId) {
+  const variantType = await VariantType.findOne({
+    _id: variantTypeId,
+    product_id: productId,
+  });
+
+  if (!variantType) {
+    throw new ApiError(404, "Variant type not found for this product");
+  }
+
+  let deactivated = 0;
+  let newCombinationsGenerated = 0;
+
+  await withProductLock(productId, async () => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // get option ids
+      const optionIds = await Option.find({ variant_type_id: variantTypeId })
+        .select("_id")
+        .lean()
+        .session(session);
+
+      const optionIdArray = optionIds.map((o) => o._id);
+
+      //  deactivate combinations
+      const result = await Combination.updateMany(
+        { product_id: productId, options: { $in: optionIdArray } },
+        { is_active: false },
+        { session }
+      );
+
+      deactivated = result.modifiedCount;
+
+      //  delete options + variant type
+      await Option.deleteMany({ variant_type_id: variantTypeId }, { session });
+      await VariantType.findByIdAndDelete(variantTypeId, { session });
+
+      //  decrement count
+      await Product.findByIdAndUpdate(
+        productId,
+        { $inc: { variant_type_count: -1 } },
+        { session }
+      );
+
+      //  regenerate combinations
+      newCombinationsGenerated = await generateCombinationsForProduct(
+        productId,
+        session
+      );
+
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  });
+
+  await invalidateProductCache(productId);
+
+  return {
+    name: variantType.name,
+    deactivated,
+    newCombinationsGenerated,
+  };
+};
+
+
+
+
+
+
+
+export {addVariantTypeService ,  addOptionService , deleteVariantTypeService};
