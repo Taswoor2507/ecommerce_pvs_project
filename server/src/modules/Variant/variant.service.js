@@ -259,8 +259,61 @@ async function deleteVariantTypeService (productId, variantTypeId) {
 
 
 
+// Remove a single option; soft-delete its combinations
+async function deleteOptionService (optionId)  {
+  const option = await Option.findById(optionId);
+  if (!option) throw new ApiError(404, "Option not found");
+
+  const { product_id, variant_type_id, value } = option;
+
+  // Safety: cannot delete the last option in a variant type
+  const remainingCount = await Option.countDocuments({ variant_type_id });
+  if (remainingCount <= 1) {
+    throw new ApiError(
+      400,
+      "Cannot delete the last option in a variant type. Delete the variant type instead."
+    );
+  }
+
+  let deactivated = 0;
+
+  await withProductLock(product_id.toString(), async () => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Soft-delete combinations containing this option
+      const result = await Combination.updateMany(
+        { product_id, options: optionId },
+        { is_active: false },
+        { session }
+      );
+      deactivated = result.modifiedCount;
+
+      // Hard delete the option
+      await Option.findByIdAndDelete(optionId, { session });
+
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  });
+
+  // Invalidate cache
+  await invalidateProductCache(product_id.toString());
+
+  return { value, deactivated };
+};
 
 
 
 
-export {addVariantTypeService ,  addOptionService , deleteVariantTypeService};
+export {
+  addVariantTypeService,
+  addOptionService,
+  deleteVariantTypeService,
+  deleteOptionService,
+};

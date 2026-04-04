@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { addOption, addVariantType, deleteVariantType } from "./variant.controller.js";
+import { addOption, addVariantType, deleteOption, deleteVariantType } from "./variant.controller.js";
 import validate from "../../middlewares/validate.js";
 import addVariantTypeSchema, { addOptionSchema } from "./variant.validator.js";
 const variantRouter = Router();
@@ -8,5 +8,5 @@ const variantRouter = Router();
 variantRouter.route("/:id/variants").post(validate(addVariantTypeSchema), addVariantType);
 variantRouter.route("/:id/variants/:vid/options").post(validate(addOptionSchema), addOption);
 variantRouter.route("/:id/variants/:vid").delete(deleteVariantType);
-
+variantRouter.route("/variants/options/:oid").delete(deleteOption);
 export default variantRouter;
