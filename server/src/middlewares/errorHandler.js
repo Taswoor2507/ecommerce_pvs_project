@@ -5,11 +5,29 @@ export const errorHandler = (err, req, res, next) => {
     const duplicateField = Object.keys(err.keyPattern)[0];
     const duplicateValue = err.keyValue[duplicateField];
     
-    // Handle specific cases
+    // Handle specific duplicate cases
     if (duplicateField === 'name') {
       return res.status(409).json({
         success: false,
         message: `A record with '${duplicateValue}' already exists`,
+      });
+    }
+    
+    // Handle option duplicate (variant_type_id + value combination)
+    if (err.keyPattern.variant_type_id && err.keyPattern.value) {
+      const optionValue = err.keyValue.value;
+      return res.status(409).json({
+        success: false,
+        message: `Option '${optionValue}' already exists for this variant type`,
+      });
+    }
+    
+    // Handle variant type duplicate (product_id + name combination)
+    if (err.keyPattern.product_id && err.keyPattern.name) {
+      const variantName = err.keyValue.name;
+      return res.status(409).json({
+        success: false,
+        message: `Variant type '${variantName}' already exists for this product`,
       });
     }
     

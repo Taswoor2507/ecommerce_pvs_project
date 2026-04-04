@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { Product, VariantType, Option } from '../../models/index.js';
 import { withProductLock } from '../../utils/redisLock.js';
-import { generateCombinationsForProduct } from '../combinations/combination.service.js';
+import { generateCombinationsForNewOption, generateCombinationsForProduct } from '../combinations/combination.service.js';
 import { invalidateProductCache } from '../../utils/cache.js';
 import { ApiError } from '../../utils/apiError.js';
 
@@ -106,4 +106,79 @@ import { ApiError } from '../../utils/apiError.js';
   return { variantType, options, combinationsGenerated };
 }
 
-export {addVariantTypeService};
+
+
+const addOptionService = async (productId, variantTypeId, optionValue) => {
+  // verify product + variant
+  const [product, variantType] = await Promise.all([
+    Product.findOne({ _id: productId, is_active: true }),
+    VariantType.findOne({ _id: variantTypeId, product_id: productId }),
+  ]);
+
+  if (!product) throw new ApiError(404, "Product not found");
+  if (!variantType) throw new ApiError(404, "Variant type not found for this product");
+
+  let newOption;
+  let newCombinationsGenerated = 0;
+
+  await withProductLock(productId, async () => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Check if option already exists for this variant type
+      const existingOption = await Option.findOne({
+        variant_type_id: variantTypeId,
+        value: { $regex: new RegExp(`^${optionValue.trim()}$`, 'i') } // Case-insensitive check
+      }).session(session);
+      
+      if (existingOption) {
+        throw new ApiError(409, `Option '${optionValue.trim()}' already exists for this variant type`);
+      }
+
+      // count existing options
+      const existingCount = await Option.countDocuments({
+        variant_type_id: variantTypeId,
+      });
+
+      // create option
+      [newOption] = await Option.create(
+        [
+          {
+            variant_type_id: variantTypeId,
+            product_id: productId,
+            value: optionValue.trim(),
+            position: existingCount,
+          },
+        ],
+        { session }
+      );
+
+      // generate ONLY new combinations
+      newCombinationsGenerated = await generateCombinationsForNewOption(
+        productId,
+        variantTypeId,
+        newOption._id.toString(),
+        session
+      );
+
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err; 
+    } finally {
+      session.endSession();
+    }
+  });
+
+  // cache invalidate
+  await invalidateProductCache(productId);
+
+  return {
+    newOption,
+    newCombinationsGenerated,
+  };
+};
+
+
+export {addVariantTypeService ,  addOptionService};
