@@ -53,6 +53,7 @@ const listProductsService = async (queryParams) => {
         name: p.name,
         description: p.description,
         base_price: p.base_price,
+        image: p.image,
         variant_type_count: p.variant_type_count,
         createdAt: p.createdAt,
     }));
