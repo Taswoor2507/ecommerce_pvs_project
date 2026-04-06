@@ -1,7 +1,8 @@
 
 import mongoose from 'mongoose';
-import { VariantType, Combination , Option } from "../../models/index.js"
+import { VariantType, Combination , Option , Product } from "../../models/index.js"
 import { ApiError } from '../../utils/apiError.js';
+
 
 // ── Hash helpers ──────────────────────────────────────────────────────────────
 
@@ -415,10 +416,45 @@ async function validateAndFixCombinations(productId, session) {
   return fixedCount;
 }
 
+
+
+
+
+
+async function listCombinationsService  (productId) {
+  const product = await Product.findOne({ _id: productId, is_active: true }).lean();
+  if (!product) throw new ApiError(404, "Product not found");
+
+  const combinations = await Combination.find({
+    product_id: productId,
+    is_active: true,
+  })
+    .sort({ createdAt: 1 })
+    .lean();
+
+  // Compute final data
+  const data = combinations.map((c) => ({
+    _id: c._id,
+    option_labels: c.option_labels,
+    additional_price: c.additional_price,
+    final_price: parseFloat((product.base_price + c.additional_price).toFixed(2)),
+    stock: c.stock,
+    in_stock: c.stock > 0,
+  }));
+
+  return { product_base_price: product.base_price, combinations: data };
+};
+
+
+
+
+
+
 export {
   generateCombinationsForProduct,
   generateCombinationsForNewOption,
   lookupCombination,
   buildHash,
   validateAndFixCombinations,
+  listCombinationsService,
 };

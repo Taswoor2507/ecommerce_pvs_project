@@ -6,6 +6,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { authRouter } from './modules/auth/auth.route.js';
 import { productRouter } from './modules/product/product.route.js';
 import variantRouter from './modules/Variant/variant.route.js';
+import { combinationRouter } from './modules/combinations/combination.route.js';
 
 const app = express();
 // CORS
@@ -33,6 +34,8 @@ app.use("/api/v1/auth" , authRouter);
 app.use("/api/v1/products" , productRouter); 
 //variant router
 app.use("/api/v1/products" , variantRouter);
+//combination router
+app.use("/api/v1/products" , combinationRouter)
 //error middleware
 app.use(errorHandler);
 
