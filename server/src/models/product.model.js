@@ -18,6 +18,11 @@ const ProductSchema = new mongoose.Schema(
       required: [true, 'Base price is required'],
       min:      [0, 'Base price cannot be negative'],
     },
+    image: {
+      type:    String,
+      default: 'https://www.inkfactory.pk/wp-content/uploads/2019/08/T-Shirt-Mockup-007.jpg',
+      trim:    true,
+    },
     variant_type_count: {
       type:    Number,
       default: 0,
