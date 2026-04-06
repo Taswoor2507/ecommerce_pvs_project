@@ -1,10 +1,11 @@
 import redis from '../config/redis.js';
 import { Product, VariantType, Option } from '../models/index.js';
+import Combination from '../models/combination.model.js';
 
 const CACHE_TTL = 300; // 5 minutes 
 
 /**
- * Get full product data (product + variant types + options, nested).
+ * Get full product data (product + variant types + options + combinations, nested).
  * Checks Redis cache first; on miss, fetches from MongoDB and populates cache.
  *
  * @param {string} productId  MongoDB ObjectId string
@@ -33,6 +34,14 @@ async function getProductWithVariants(productId) {
     .sort({ position: 1, createdAt: 1 })
     .lean();
 
+  // Fetch all active combinations for this product
+  const combinations = await Combination.find({ 
+    product_id: productId, 
+    is_active: true 
+  })
+    .sort({ createdAt: 1 })
+    .lean();
+
   // Group options by variant_type_id for O(N) assembly (not O(N²))
   const optionsByType = options.reduce((acc, opt) => {
     const key = opt.variant_type_id.toString();
@@ -41,12 +50,25 @@ async function getProductWithVariants(productId) {
     return acc;
   }, {});
 
+  // Process combinations with computed final prices
+  const processedCombinations = combinations.map((c) => ({
+    _id: c._id,
+    option_labels: c.option_labels,
+    additional_price: c.additional_price,
+    final_price: parseFloat((product.base_price + c.additional_price).toFixed(2)),
+    stock: c.stock,
+    in_stock: c.stock > 0,
+    options_hash: c.options_hash,
+  }));
+
   const result = {
     ...product,
     variant_types: variantTypes.map((vt) => ({
       ...vt,
       options: optionsByType[vt._id.toString()] || [],
     })),
+    combinations: processedCombinations,
+    combinations_count: processedCombinations.length,
   };
 
   // ── 3. Populate cache ─────────────────────────────────────────────────────

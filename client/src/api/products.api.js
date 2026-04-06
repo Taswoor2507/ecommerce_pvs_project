@@ -5,6 +5,11 @@ export const productsApi = {
   list: (params = {}) => api.get('/products', { params }).then((r) => r.data.data),
   getById: (id) => api.get(`/products/${id}`).then((r) => r.data.data),
 
+  // ── Product Combinations ─────────────────────────────────────────────────────
+  getCombinations: (productId) => api.get(`/products/${productId}/combinations`).then((r) => r.data.data),
+  lookupCombination: (productId, selection) => 
+    api.post(`/products/${productId}/combinations/lookup`, selection).then((r) => r.data.data),
+
   // ── Admin ─────────────────────────────────────────────────────────────────────
 //   create: (payload) => api.post('/products', payload).then((r) => r.data),
 //   update: (id, payload) => api.put(`/products/${id}`, payload).then((r) => r.data),

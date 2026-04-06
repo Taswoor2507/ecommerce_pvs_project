@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { productsApi } from "../api/products.api";
 import ProductsList from "../components/ProductsList";
@@ -10,8 +11,23 @@ import SkeletonSearch from "../components/ui/SkeletonSearch";
 import SkeletonCard from "../components/ui/SkeletonCard";
 
 const ProductListPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get page and search from URL, fallback to defaults
+  const pageFromUrl = parseInt(searchParams.get('page')) || 1;
+  const searchFromUrl = searchParams.get('search') || '';
+  
+  // Sync URL params to state during render (React allows this pattern)
+  const [searchTerm, setSearchTerm] = useState(searchFromUrl);
+  const [page, setPage] = useState(pageFromUrl);
+  
+  // Keep state in sync with URL params
+  if (page !== pageFromUrl) {
+    setPage(pageFromUrl);
+  }
+  if (searchTerm !== searchFromUrl) {
+    setSearchTerm(searchFromUrl);
+  }
 
   const {
     data: productsData,
@@ -34,12 +50,10 @@ const ProductListPage = () => {
       if ([404, 403].includes(status)) return false;
       return failureCount < 2;
     },
-    // CRITICAL: Prevent any automatic refetching that could reset state
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Don't refetch on mount
+    refetchOnMount: false,
     refetchOnReconnect: false,
     refetchInterval: false,
-    // Prevent background refetches that could override manual page changes
     refetchIntervalInBackground: false,
   });
 
@@ -49,24 +63,30 @@ const ProductListPage = () => {
     if (newSearchTerm !== searchTerm) {
       setSearchTerm(newSearchTerm);
       setPage(1); // Reset to first page when searching
+      // Update URL with new search and reset page
+      setSearchParams({ 
+        ...(newSearchTerm && { search: newSearchTerm }),
+        page: 1 
+      });
     }
-  }, [searchTerm, page]);
+  }, [searchTerm, setSearchParams]);
 
   const handlePageChange = useCallback((newPage) => {
     if (newPage !== page && newPage >= 1) {
       setPage(newPage);
+      // Update URL with new page
+      setSearchParams({ 
+        ...(searchTerm && { search: searchTerm }),
+        page: newPage 
+      });
       
       // Scroll after a small delay to ensure state updates
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
     }
-  }, [page, searchTerm, productsData?.pagination?.page]);
+  }, [page, searchTerm, setSearchParams]);
 
-  // Debug effect to monitor page changes
-  useEffect(() => {
-    // Page state monitoring removed for production
-  }, [page, productsData?.pagination?.page, isLoading, isFetching]);
 
   if (error) {
     return (
