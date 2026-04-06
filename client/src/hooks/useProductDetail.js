@@ -9,10 +9,10 @@ export const useProductDetail = (productId) => {
     queryKey: ['product', productId],
     queryFn: () => productsApi.getById(productId),
     enabled: !!productId,
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
-    gcTime: 1000 * 60 * 10, // 10 minutes garbage collection
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
     retry: (failureCount, error) => {
-      // Don't retry on 404 (not found) or 400 (bad request)
+      // Don't retry on 404 (not found) or 400 
       const status = error?.response?.status;
       if ([400, 404].includes(status)) return false;
       return failureCount < 2;
@@ -21,7 +21,7 @@ export const useProductDetail = (productId) => {
   });
 
   // ── Mutation: Combination Lookup 
-  // Used when user selects specific variant options (for real-time validation)
+  // Used when user selects specific variant options 
   const lookupMutation = useMutation({
     mutationFn: (selection) => productsApi.lookupCombination(productId, selection),
     retry: 1,

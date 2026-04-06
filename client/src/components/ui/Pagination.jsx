@@ -1,4 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import IconButton from "./IconButton";
+import Button from "./Button";
 
 const Pagination = ({ pagination, onPageChange, className = "" }) => {
   const { page: currentPage, pages: totalPages, total, limit } = pagination;
@@ -59,21 +61,15 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
       {/* Pagination Controls */}
       <nav className="flex items-center space-x-1" role="navigation" aria-label="Pagination navigation">
         {/* Previous Button */}
-        <button
+        <IconButton
+          icon={ChevronLeft}
+          variant="secondary"
+          size="md"
           onClick={() => handlePageClick(currentPage - 1)}
-          disabled={currentPage === 1}
-          className={`
-            p-2 rounded-lg border transition-all duration-200 font-medium text-sm
-            ${currentPage === 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-              : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:shadow-sm active:scale-95'
-            }
-          `}
-          aria-label="Go to previous page"
-          aria-disabled={currentPage === 1}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
+          isDisabled={currentPage === 1}
+          ariaLabel="Go to previous page"
+          className="border border-gray-300"
+        />
 
         {/* Page Numbers */}
         <div className="flex items-center space-x-1">
@@ -87,43 +83,34 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
                   ...
                 </span>
               ) : (
-                <button
+                <Button
                   onClick={() => handlePageClick(pageNum)}
-                  disabled={pageNum === currentPage}
-                  className={`
-                    px-3 py-2 rounded-lg border transition-all duration-200 font-medium text-sm
-                    ${pageNum === currentPage
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md cursor-default'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:shadow-sm active:scale-95 cursor-pointer'
-                    }
-                  `}
-                  aria-label={`Go to page ${pageNum}`}
+                  isDisabled={pageNum === currentPage}
+                  variant={pageNum === currentPage ? "primary" : "secondary"}
+                  size="sm"
+                  rounded="lg"
+                  className="min-w-[40px]"
+                  ariaLabel={`Go to page ${pageNum}`}
                   aria-current={pageNum === currentPage ? 'page' : undefined}
                   aria-pressed={pageNum === currentPage}
                 >
                   {pageNum}
-                </button>
+                </Button>
               )}
             </div>
           ))}
         </div>
 
         {/* Next Button */}
-        <button
+        <IconButton
+          icon={ChevronRight}
+          variant="secondary"
+          size="md"
           onClick={() => handlePageClick(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className={`
-            p-2 rounded-lg border transition-all duration-200 font-medium text-sm
-            ${currentPage === totalPages
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-              : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:shadow-sm active:scale-95'
-            }
-          `}
-          aria-label="Go to next page"
-          aria-disabled={currentPage === totalPages}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
+          isDisabled={currentPage === totalPages}
+          ariaLabel="Go to next page"
+          className="border border-gray-300"
+        />
       </nav>
     </div>
   );

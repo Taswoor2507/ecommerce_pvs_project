@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
-import { ShoppingCart, Minus, Plus, AlertCircle, Check, Package, Tag } from 'lucide-react';
+import { ShoppingCart, AlertCircle, Check, Package, Tag } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
+import Button from './ui/Button';
+import QuantitySelector from './ui/QuantitySelector';
+import Badge from './ui/Badge';
 
 /**
  * ProductInfo Component - Enhanced Price Display
@@ -26,23 +29,10 @@ const ProductInfo = ({
   const hasPriceVariation = additionalPrice > 0;
   const totalPrice = displayPrice * quantity;
 
-  // Handle quantity changes
-  const handleDecreaseQuantity = useCallback(() => {
-    setQuantity(prev => Math.max(1, prev - 1));
+  // Handle quantity changes via QuantitySelector
+  const handleQuantityChange = useCallback((newQuantity) => {
+    setQuantity(newQuantity);
   }, []);
-
-  const handleIncreaseQuantity = useCallback(() => {
-    if (stock > 0) {
-      setQuantity(prev => Math.min(stock, prev + 1));
-    }
-  }, [stock]);
-
-  const handleQuantityChange = useCallback((e) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= 1) {
-      setQuantity(Math.min(stock > 0 ? stock : 99, value));
-    }
-  }, [stock]);
 
   // Handle add to cart
   const handleAddToCart = useCallback(async () => {
@@ -76,22 +66,22 @@ const ProductInfo = ({
   const getStockStatus = () => {
     if (!inStock || stock === 0) {
       return {
-        icon: <AlertCircle className="w-5 h-5" />,
+        variant: 'danger',
+        icon: AlertCircle,
         text: 'Out of Stock',
-        color: 'text-red-600 bg-red-50 border-red-200',
       };
     }
     if (stock <= 5) {
       return {
-        icon: <AlertCircle className="w-5 h-5" />,
+        variant: 'warning',
+        icon: AlertCircle,
         text: `Only ${stock} left`,
-        color: 'text-amber-600 bg-amber-50 border-amber-200',
       };
     }
     return {
-      icon: <Check className="w-5 h-5" />,
+      variant: 'success',
+      icon: Check,
       text: 'In Stock',
-      color: 'text-green-600 bg-green-50 border-green-200',
     };
   };
 
@@ -136,15 +126,16 @@ const ProductInfo = ({
       </div>
 
       {/* Stock Status */}
-      <div className={`
-        inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border ${stockStatus.color}
-      `}>
-        {stockStatus.icon}
-        <span className="font-semibold text-sm">{stockStatus.text}</span>
+      <Badge
+        variant={stockStatus.variant}
+        size="md"
+        leftIcon={stockStatus.icon}
+      >
+        {stockStatus.text}
         {stock > 0 && stock <= 20 && (
-          <span className="text-xs opacity-75">({stock} available)</span>
+          <span className="text-xs opacity-75 ml-1">({stock} available)</span>
         )}
-      </div>
+      </Badge>
 
       {/* Quantity Selector */}
       {inStock && stock > 0 && (
@@ -152,53 +143,28 @@ const ProductInfo = ({
           <label className="block text-sm font-semibold text-gray-900">
             Quantity
           </label>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
-              <button
-                onClick={handleDecreaseQuantity}
-                disabled={quantity <= 1}
-                className="px-4 py-3 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Decrease quantity"
-              >
-                <Minus className="w-5 h-5" />
-              </button>
-              <input
-                type="number"
-                value={quantity}
-                onChange={handleQuantityChange}
-                min={1}
-                max={stock}
-                className="w-16 text-center border-x-2 border-gray-200 py-3 text-gray-900 font-bold text-lg focus:outline-none"
-              />
-              <button
-                onClick={handleIncreaseQuantity}
-                disabled={quantity >= stock}
-                className="px-4 py-3 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Increase quantity"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          <QuantitySelector
+            value={quantity}
+            onChange={handleQuantityChange}
+            min={1}
+            max={stock}
+            size="lg"
+          />
         </div>
       )}
 
       {/* Add to Cart Button */}
-      <button
+      <Button
+        variant="primary"
+        size="xl"
+        fullWidth
         onClick={handleAddToCart}
-        disabled={isAddToCartDisabled}
-        className={`
-          w-full flex items-center justify-center gap-3 px-8 py-4 
-          rounded-xl font-bold text-lg transition-all duration-200 shadow-sm
-          ${isAddToCartDisabled
-            ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-            : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
-          }
-        `}
+        isLoading={isAddingToCart}
+        isDisabled={isAddToCartDisabled}
+        leftIcon={<ShoppingCart className="w-6 h-6" />}
       >
-        <ShoppingCart className="w-6 h-6" />
         {getButtonText()}
-      </button>
+      </Button>
     </div>
   );
 };

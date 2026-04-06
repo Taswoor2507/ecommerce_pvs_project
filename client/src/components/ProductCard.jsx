@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatCurrency } from "../utils/format";
+import Badge from "./ui/Badge";
+import Button from "./ui/Button";
 
 const ProductCard = ({ product, className = "" }) => {
   const {
@@ -37,18 +39,19 @@ const ProductCard = ({ product, className = "" }) => {
         
         {/* Variant Badge */}
         {variant_type_count > 0 && (
-          <div className="absolute top-3 right-3 bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-            {variant_type_count} {variant_type_count === 1 ? 'Variant' : 'Variants'}
+          <div className="absolute top-3 right-3 shadow-lg">
+            <Badge variant="primary" size="sm" roundedFull>
+              {variant_type_count} {variant_type_count === 1 ? 'Variant' : 'Variants'}
+            </Badge>
           </div>
         )}
 
         {/* Quick View Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-          <Link
-            to={`/products/${id}`}
-            className="bg-white text-gray-900 px-6 py-2 rounded-full font-medium shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-gray-50"
-          >
-            View Details
+          <Link to={`/products/${id}`}>
+            <Button variant="secondary" size="md" rounded="full">
+              View Details
+            </Button>
           </Link>
         </div>
       </div>
@@ -82,11 +85,10 @@ const ProductCard = ({ product, className = "" }) => {
             )}
           </div>
           
-          <Link
-            to={`/products/${id}`}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium text-sm shadow-sm hover:shadow-md"
-          >
-            View
+          <Link to={`/products/${id}`}>
+            <Button variant="primary" size="sm">
+              View
+            </Button>
           </Link>
         </div>
       </div>
