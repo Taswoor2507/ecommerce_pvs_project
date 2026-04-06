@@ -1,8 +1,8 @@
-import { listCombinationsService } from "./combination.service.js";
+import { listCombinationsService, updateCombinationService } from "./combination.service.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
 
 // list all combinations for a product
-export const listCombinationsController = asyncHandler(async (req, res) => {
+ const listCombinations = asyncHandler(async (req, res) => {
   const { id: productId } = req.params;
 
   const data = await listCombinationsService(productId);
@@ -12,3 +12,23 @@ export const listCombinationsController = asyncHandler(async (req, res) => {
     data,
   });
 });
+
+
+// updat combination controller 
+ const updateCombination = asyncHandler(async (req, res) => {
+  const { cid } = req.params;
+
+  const data = await updateCombinationService(cid, req.body);
+
+  res.json({
+    status: "success",
+    data,
+  });
+});
+
+
+
+export {
+    listCombinations,
+    updateCombination
+}

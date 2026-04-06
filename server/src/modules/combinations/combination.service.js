@@ -419,8 +419,7 @@ async function validateAndFixCombinations(productId, session) {
 
 
 
-
-
+//  list all combinations for a product
 async function listCombinationsService  (productId) {
   const product = await Product.findOne({ _id: productId, is_active: true }).lean();
   if (!product) throw new ApiError(404, "Product not found");
@@ -446,6 +445,45 @@ async function listCombinationsService  (productId) {
 };
 
 
+// update  combination
+async function updateCombinationService (comboId, payload) {
+  const update = {};
+
+  if (payload.additional_price !== undefined) {
+    update.additional_price = payload.additional_price;
+  }
+
+  if (payload.stock !== undefined) {
+    update.stock = Math.floor(payload.stock);
+  }
+
+  const combo = await Combination.findOneAndUpdate(
+    { _id: comboId, is_active: true },
+    update,
+    { new: true, runValidators: true }
+  );
+
+  if (!combo) throw new ApiError(404, "Combination not found");
+
+  // Fetch product base price
+  const product = await Product.findById(combo.product_id)
+    .select("base_price")
+    .lean();
+
+  const final_price = product
+    ? parseFloat((product.base_price + combo.additional_price).toFixed(2))
+    : null;
+
+  return {
+    _id: combo._id,
+    option_labels: combo.option_labels,
+    additional_price: combo.additional_price,
+    final_price,
+    stock: combo.stock,
+    in_stock: combo.stock > 0,
+  };
+};
+
 
 
 
@@ -457,4 +495,5 @@ export {
   buildHash,
   validateAndFixCombinations,
   listCombinationsService,
-};
+  updateCombinationService,
+  };
