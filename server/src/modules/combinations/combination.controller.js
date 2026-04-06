@@ -1,4 +1,4 @@
-import { listCombinationsService, updateCombinationService } from "./combination.service.js";
+import { listCombinationsService, updateCombinationService, lookupCombination } from "./combination.service.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
 
 // list all combinations for a product
@@ -14,7 +14,7 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js";
 });
 
 
-// updat combination controller 
+// update combination controller 
  const updateCombination = asyncHandler(async (req, res) => {
   const { cid } = req.params;
 
@@ -28,7 +28,18 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js";
 
 
 
+
+// Storefront: given a selection map, return the matching combination
+const lookupCombinationHandler = asyncHandler(async (req, res) => {
+  const { id: productId } = req.params;
+  const result = await lookupCombination(productId, req.body);
+  res.json({ status: 'success', data: result });
+});
+
+
+
 export {
     listCombinations,
-    updateCombination
+    updateCombination,
+    lookupCombinationHandler
 }

@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 import { VariantType, Combination , Option , Product } from "../../models/index.js"
 import { ApiError } from '../../utils/apiError.js';
+import { getProductWithVariants } from '../../utils/cache.js';
 
 
 // ── Hash helpers ──────────────────────────────────────────────────────────────
@@ -299,7 +300,6 @@ async function generateCombinationsForNewOption(
  */
 async function lookupCombination(productId, selection) {
   // Use cache for product + variants (avoids 2 extra DB reads)
-  const { getProductWithVariants } = require('../utils/cache');
   const productData = await getProductWithVariants(productId);
 
   if (!productData) {
