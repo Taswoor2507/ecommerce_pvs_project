@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { useProductDetail } from '../hooks/useProductDetail';
+import { useCartActions } from '../hooks/useCartActions';
 import ProductImages from '../components/ProductImages';
 import VariantSelector from '../components/VariantSelector';
 import ProductInfo from '../components/ProductInfo';
@@ -31,6 +32,7 @@ const ProductDetailPage = () => {
     lookupCombinationState,
     refetchProduct,
   } = useProductDetail(id);
+  const { addToCart } = useCartActions();
 
   // ── Derived State
   const isAllVariantsSelected = useMemo(() => {
@@ -116,18 +118,31 @@ const ProductDetailPage = () => {
   }, [lookupCombination, variantTypes]);
 
   const handleAddToCart = useCallback(async (quantity) => {
-    // TODO: Implement cart functionality
-    // For now, just log the cart action
-    console.log('Adding to cart:', {
-      productId: id,
-      combinationId: combinationInfo.combinationId,
-      quantity,
-      selectedVariants,
-    });
+    // Prevent adding if product has no stock
+    const availableStock = hasVariants ? combinationInfo.stock : (product.stock || 0);
+    if (availableStock <= 0) {
+      alert('This product is out of stock');
+      return;
+    }
     
-    // Show success message (can be replaced with toast notification)
-    alert(`Added ${quantity} item(s) to cart!`);
-  }, [id, combinationInfo.combinationId, selectedVariants]);
+    // Prevent adding more than available stock
+    if (quantity > availableStock) {
+      alert(`Only ${availableStock} items available in stock`);
+      return;
+    }
+
+    const selectedCombo = combinations.find(combo => {
+      const comboSelections = combo.option_labels.reduce((acc, label) => {
+        acc[label.type] = label.value;
+        return acc;
+      }, {});
+      return Object.entries(selectedVariants).every(
+        ([type, value]) => comboSelections[type] === value
+      );
+    });
+
+    addToCart(product, selectedCombo || null, quantity);
+  }, [product, combinations, selectedVariants, addToCart, hasVariants, combinationInfo.stock]);
 
   const handleRetry = useCallback(() => {
     refetchProduct();
@@ -264,8 +279,8 @@ const ProductDetailPage = () => {
                   basePrice={productBasePrice}
                   finalPrice={combinationInfo.finalPrice}
                   additionalPrice={combinationInfo.additionalPrice}
-                  stock={combinationInfo.stock}
-                  inStock={hasVariants ? combinationInfo.inStock : true}
+                  stock={hasVariants ? combinationInfo.stock : (product.stock || 0)}
+                  inStock={hasVariants ? combinationInfo.inStock : (product.stock > 0)}
                   hasVariants={hasVariants}
                   isAllVariantsSelected={isAllVariantsSelected}
                   isLoadingCombination={lookupCombinationState.isPending}

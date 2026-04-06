@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ShoppingCart, Minus, Plus, AlertCircle, Check, Package, Tag } from 'lucide-react';
-import { formatCurrency } from '../utils/format';
+import { formatCurrency } from '../utils/formatters';
 
 /**
  * ProductInfo Component - Enhanced Price Display
