@@ -460,7 +460,7 @@ async function updateCombinationService (comboId, payload) {
   const combo = await Combination.findOneAndUpdate(
     { _id: comboId, is_active: true },
     update,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   if (!combo) throw new ApiError(404, "Combination not found");

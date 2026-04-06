@@ -129,7 +129,7 @@ const updateProductService = async (productId, payload) => {
   const updatedProduct = await Product.findOneAndUpdate(
     { _id: productId, is_active: true },
     update,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   // Invalidate cache only if price actually changed

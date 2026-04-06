@@ -18,7 +18,7 @@ async function placeOrderService(combinationId, quantity) {
         $inc: { stock: -quantity },
       },
       {
-        new: true,
+        returnDocument: 'after',
         session,
         select: "stock product_id additional_price option_labels",
       }
