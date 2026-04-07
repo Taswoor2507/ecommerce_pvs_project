@@ -1,7 +1,7 @@
 import ProductCard from "./ProductCard";
 import SkeletonCard from "./ui/SkeletonCard";
 
-const ProductsList = ({ products, isLoading = false, className = "" }) => {
+const ProductsList = ({ products, isLoading = false, className = "", currentPage = 1 }) => {
   if (!products || products.length === 0) {
     return (
       <div className={`text-center py-20 ${className}`}>
@@ -40,6 +40,7 @@ const ProductsList = ({ products, isLoading = false, className = "" }) => {
         <ProductCard 
           key={product.id} 
           product={product}
+          currentPage={currentPage}
           className={isLoading ? "opacity-75" : ""}
         />
       ))}

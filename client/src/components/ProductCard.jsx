@@ -3,7 +3,7 @@ import { formatCurrency } from "../utils/format";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 
-const ProductCard = ({ product, className = "" }) => {
+const ProductCard = ({ product, className = "", currentPage = 1 }) => {
   const {
     id,
     name,
@@ -58,7 +58,7 @@ const ProductCard = ({ product, className = "" }) => {
 
         {/* Quick View Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-          <Link to={`/products/${id}`}>
+          <Link to={`/products/${id}?page=${currentPage}`}>
             <Button variant="secondary" size="md" rounded="full">
               View Details
             </Button>
@@ -71,7 +71,7 @@ const ProductCard = ({ product, className = "" }) => {
         {/* Product Name */}
         <div className="mb-3">
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-indigo-600 transition-colors leading-tight">
-            <Link to={`/products/${id}`} className="block">
+            <Link to={`/products/${id}?page=${currentPage}`} className="block">
               {name}
             </Link>
           </h3>
@@ -95,7 +95,7 @@ const ProductCard = ({ product, className = "" }) => {
             )}
           </div>
           
-          <Link to={`/products/${id}`}>
+          <Link to={`/products/${id}?page=${currentPage}`}>
             <Button variant="primary" size="sm" isDisabled={isOutOfStock}>
               {isOutOfStock ? "Out of Stock" : "View"}
             </Button>

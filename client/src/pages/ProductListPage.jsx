@@ -148,6 +148,7 @@ const ProductListPage = () => {
           <ProductsList
             products={productsData?.products || []}
             isLoading={isFetching}
+            currentPage={page}
           />
         )}
 
