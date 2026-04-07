@@ -15,6 +15,8 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
   const [bulkStock, setBulkStock] = useState('');
   const [bulkPrice, setBulkPrice] = useState('');
   const [selectedCombinations, setSelectedCombinations] = useState(new Set());
+  const [editingCombination, setEditingCombination] = useState(null);
+  const [editingValues, setEditingValues] = useState({ stock: '', additional_price: '' });
 
   // Fetch combinations for the product
   const {
@@ -27,7 +29,6 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
     enabled: !!productId,
   });
 
-  
   const {
     updateCombination,
     isUpdatingCombination,
@@ -47,25 +48,67 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
     }
   }, [actualCombinationsData, combinations, onCombinationsChange]);
 
-  const handleUpdateCombination = async (combinationId, field, value) => {
+  const startEditingCombination = (combination) => {
+    setEditingCombination(combination._id);
+    setEditingValues({
+      stock: combination.stock?.toString() || '',
+      additional_price: combination.additional_price?.toString() || ''
+    });
+  };
+
+  const handleEditingValueChange = (field, value) => {
+    setEditingValues(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const saveCombination = async () => {
+    if (!editingCombination) return;
+
     try {
+      const payload = {};
+      if (editingValues.stock !== '') {
+        payload.stock = parseInt(editingValues.stock) || 0;
+      }
+      if (editingValues.additional_price !== '') {
+        payload.additional_price = parseFloat(editingValues.additional_price) || 0;
+      }
+
       await updateCombination({
-        combinationId,
-        payload: { [field]: value },
+        combinationId: editingCombination,
+        payload,
       });
-      
+
       // Refetch to get updated data
       refetch();
-      
+
+      // Reset editing state
+      setEditingCombination(null);
+      setEditingValues({ stock: '', additional_price: '' });
+
     } catch (error) {
       // Error handled by custom hook
       console.error('Update combination failed:', error);
     }
   };
 
+  const cancelEditing = () => {
+    setEditingCombination(null);
+    setEditingValues({ stock: '', additional_price: '' });
+  };
+
+  // Get display value (editing state if being edited, otherwise backend data)
+  const getDisplayValue = (combination, field) => {
+    if (editingCombination === combination._id) {
+      return editingValues[field];
+    }
+    return combination[field]?.toString() || '';
+  };
+
   const handleBulkUpdate = async (field) => {
     const value = field === 'stock' ? parseInt(bulkStock) : parseFloat(bulkPrice);
-    
+
     if (isNaN(value) || value < 0) {
       alert(`Please enter a valid ${field === 'stock' ? 'stock' : 'price'} value.`);
       return;
@@ -86,7 +129,7 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
       );
 
       await Promise.all(updatePromises);
-      
+
       // Clear selections and input
       setSelectedCombinations(new Set());
       if (field === 'stock') {
@@ -94,10 +137,10 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
       } else {
         setBulkPrice('');
       }
-      
+
       // Refetch to get updated data
       refetch();
-      
+
     } catch (error) {
       // Error handled by custom hook
       console.error('Bulk update failed:', error);
@@ -140,7 +183,7 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
             No Combinations Found
           </h3>
           <p className="text-gray-600 mb-6">
-            {productId 
+            {productId
               ? "This product doesn't have any variants or combinations. You can complete the setup."
               : "Please complete the previous steps first."
             }
@@ -191,7 +234,7 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-            
+
             {selectedCombinations.size > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">
@@ -277,6 +320,9 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -304,25 +350,43 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <input
-                          type="number"
-                          min="0"
-                          value={combination.stock}
-                          onChange={(e) => handleUpdateCombination(combination._id, 'stock', parseInt(e.target.value) || 0)}
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                          disabled={isUpdatingCombination}
-                        />
+                        {editingCombination === combination._id ? (
+                          <input
+                            type="number"
+                            min="0"
+                            value={editingValues.stock}
+                            onChange={(e) => handleEditingValueChange('stock', e.target.value)}
+                            className="w-20 px-2 py-1 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={isUpdatingCombination}
+                          />
+                        ) : (
+                          <div
+                            onClick={() => startEditingCombination(combination)}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50"
+                          >
+                            {getDisplayValue(combination, 'stock')}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={combination.additional_price}
-                          onChange={(e) => handleUpdateCombination(combination._id, 'additional_price', parseFloat(e.target.value) || 0)}
-                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                          disabled={isUpdatingCombination}
-                        />
+                        {editingCombination === combination._id ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={editingValues.additional_price}
+                            onChange={(e) => handleEditingValueChange('additional_price', e.target.value)}
+                            className="w-20 px-2 py-1 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={isUpdatingCombination}
+                          />
+                        ) : (
+                          <div
+                            onClick={() => startEditingCombination(combination)}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50"
+                          >
+                            {getDisplayValue(combination, 'additional_price')}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-medium text-gray-900">
@@ -338,6 +402,31 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
                           {combination.in_stock ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingCombination === combination._id ? (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={saveCombination}
+                              disabled={isUpdatingCombination}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={cancelEditing}
+                              disabled={isUpdatingCombination}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-500">
+                            Click to edit
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -351,23 +440,21 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
               <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5" />
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-800">
-                  Pricing & Stock Information
+                  Combination Configuration
                 </h3>
                 <div className="mt-2 text-sm text-blue-700">
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>Final Price = Base Price + Additional Price</li>
-                    <li>Stock of 0 means the combination is out of stock</li>
-                    <li>You can use bulk actions to update multiple combinations at once</li>
-                  </ul>
+                  <p>
+                    Click on any stock or additional price field to edit.
+                    Use the Save button to apply changes or Cancel to discard them.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        </>
-      )}
-
-          </div>
-  );
-};
+        </>  
+      )}    
+    </div>  
+  );       
+};          
 
 export default CombinationsStep;

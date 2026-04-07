@@ -30,7 +30,18 @@ import { asyncHandler } from '../../middlewares/asyncHandler.js';
 // add option controler
 const addOption = asyncHandler(async (req, res) => {
   const { id: productId, vid: variantTypeId } = req.params;
+  
+  
   const { option } = req.body;
+
+  if (!option) {
+    return res.status(400).json({
+      success: false,
+      errors: {
+        general: "Body is empty or option is missing"
+      }
+    });
+  }
 
   const { newOption, newCombinationsGenerated } =
     await addOptionService(productId, variantTypeId, option);

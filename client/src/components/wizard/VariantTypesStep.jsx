@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useVariantMutation } from '../../hooks/useVariantMutation.js';
 import { Plus, X, Trash2, AlertCircle } from 'lucide-react';
 import Button from '../ui/Button.jsx';
+import toast from 'react-hot-toast';
 
 const VariantTypesStep = ({ productId, variants, basicProductData, onVariantsChange }) => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -42,12 +43,12 @@ const VariantTypesStep = ({ productId, variants, basicProductData, onVariantsCha
     e.preventDefault();
     
     if (!variantName.trim() || options.length === 0) {
-      alert('Please enter a variant name and at least one option.');
+      toast.error('Please enter a variant name and at least one option.');
       return;
     }
 
     if (hasStock) {
-      alert('Cannot create variants while product has stock. Please set stock to 0 first.');
+      toast.error('Cannot create variants while product has stock. Please set stock to 0 first.');
       return;
     }
 

@@ -11,8 +11,6 @@ import {
   Eye,
   Copy,
   MoreHorizontal,
-  TrendingUp,
-  TrendingDown,
   Minus,
   Plus
 } from 'lucide-react';
@@ -210,7 +208,7 @@ const AdminProductViewPage = () => {
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg">
         <div className="border-b border-slate-200/60">
           <nav className="flex space-x-8 px-6" aria-label="Tabs">
-            {['details', 'combinations', 'analytics'].map((tab) => (
+            {['details', 'combinations'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -349,20 +347,7 @@ const AdminProductViewPage = () => {
             </div>
           )}
 
-          {/* Analytics Tab */}
-          {selectedTab === 'analytics' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Analytics</h3>
-              <div className="text-center py-8">
-                <TrendingUp className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-600">Analytics dashboard coming soon...</p>
-                <p className="text-sm text-slate-500 mt-2">
-                  This will show sales data, views, and other metrics for this product.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+                  </div>
       </div>
 
       {/* Delete Confirmation Modal */}

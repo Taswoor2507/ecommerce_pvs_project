@@ -41,7 +41,8 @@ const OptionsStep = ({ productId, variants, onVariantsChange }) => {
     if (!addingToVariant) return;
 
     try {
-      const result = await addOption(productId, addingToVariant, {
+      const result = await addOption({
+        variantTypeId: addingToVariant,
         option: data.option,
       });
 
@@ -50,7 +51,7 @@ const OptionsStep = ({ productId, variants, onVariantsChange }) => {
         if (variant._id === addingToVariant) {
           return {
             ...variant,
-            options: [...variant.options, result.data.newOption],
+            options: [...variant.options, result.data.option],
           };
         }
         return variant;
@@ -220,15 +221,15 @@ const OptionsStep = ({ productId, variants, onVariantsChange }) => {
                     <div className="flex flex-wrap gap-2">
                       {variant.options.map((option) => (
                         <div
-                          key={option._id}
+                          key={option._id || option.id || Math.random()}
                           className="group relative inline-flex items-center"
                         >
                           <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200 hover:bg-indigo-200 transition-colors">
                             <Tag className="w-3 h-3 mr-1.5 text-indigo-600" />
-                            {option.value}
+                            {option.value || option || 'Unknown'}
                           </span>
                           <button
-                            onClick={() => handleDeleteOption(option._id, variant._id)}
+                            onClick={() => handleDeleteOption(option._id || option.id, variant._id)}
                             disabled={isDeletingOption || variant.options.length <= 1}
                             className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600"
                             title={variant.options.length <= 1 ? "Cannot delete the last option" : "Delete option"}
