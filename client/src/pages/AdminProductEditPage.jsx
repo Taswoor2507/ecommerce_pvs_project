@@ -34,11 +34,11 @@ const AdminProductEditPage = () => {
 
   const [activeTab, setActiveTab] = useState('basic');
   const [newVariantType, setNewVariantType] = useState('');
-  const [newVariantOptions, setNewVariantOptions] = useState(['']); // Array of option inputs
-  const [newOptions, setNewOptions] = useState({}); // { variantTypeId: [option1, option2] }
+  const [newVariantOptions, setNewVariantOptions] = useState(['']);
+  const [newOptions, setNewOptions] = useState({});
   const [editingCombination, setEditingCombination] = useState(null);
+  const [editingValues, setEditingValues] = useState({ stock: '', additional_price: '' });
 
-  // Fetch product details
   const { 
     product, 
     combinations, 
@@ -48,7 +48,6 @@ const AdminProductEditPage = () => {
     refetchProduct 
   } = useProductDetail(id);
 
-  // Variant mutations
   const {
     addVariantType,
     addOption,
@@ -64,7 +63,6 @@ const AdminProductEditPage = () => {
     isUpdatingCombination
   } = useVariantMutation(id);
 
-  // Initialize form with product data
   useEffect(() => {
     if (product) {
       setFormData({
@@ -86,11 +84,9 @@ const AdminProductEditPage = () => {
     }));
   };
 
-  // Variant management functions
   const handleAddVariantType = async () => {
     if (!newVariantType.trim()) return;
     
-    // Filter out empty options and trim
     const validOptions = newVariantOptions
       .map(opt => opt.trim())
       .filter(opt => opt.length > 0);
@@ -163,11 +159,30 @@ const AdminProductEditPage = () => {
     try {
       await updateCombination({ combinationId, payload: updates });
       setEditingCombination(null);
+      setEditingValues({ stock: '', additional_price: '' });
       await refetchProduct();
     } catch (error) {
       console.error('Failed to update combination:', error);
       alert(error.response?.data?.message || 'Failed to update combination');
     }
+  };
+
+  const handleEditingValueChange = (field, value) => {
+    setEditingValues(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const startEditingCombination = (combination) => {
+    console.log('Starting edit for combination:', combination);
+    const values = {
+      stock: combination.stock || '',
+      additional_price: combination.additional_price || ''
+    };
+    console.log('Setting editing values to:', values);
+    setEditingCombination(combination._id);
+    setEditingValues(values);
   };
 
   const handleVariantOptionChange = (index, value) => {
@@ -218,7 +233,6 @@ const AdminProductEditPage = () => {
     setSaveMessage('');
 
     try {
-      // Validate required fields
       if (!formData.name || !formData.base_price) {
         throw new Error('Name and base price are required');
       }
@@ -234,11 +248,7 @@ const AdminProductEditPage = () => {
 
       await productsApi.update(id, updateData);
       setSaveMessage('Product updated successfully!');
-      
-      // Refetch to get updated data
       await refetchProduct();
-      
-      // Clear message after 3 seconds
       setTimeout(() => setSaveMessage(''), 3000);
       
     } catch (error) {
@@ -264,7 +274,7 @@ const AdminProductEditPage = () => {
         <div className="text-center">
           <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-slate-900 mb-2">Product Not Found</h2>
-          <p className="text-slate-600 mb-4">{error?.message || 'This product may have been deleted or doesn\'t exist.'}</p>
+          <p className="text-slate-600 mb-4">{error?.message || "This product may have been deleted or doesn't exist."}</p>
           <Button onClick={() => navigate('/admin/products')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Products
@@ -447,8 +457,7 @@ const AdminProductEditPage = () => {
 
           {/* Variants Tab */}
           {activeTab === 'variants' && (
-            <>
-              <div className="space-y-8">
+            <div className="space-y-8">
               {/* Variant Types Management */}
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -518,91 +527,92 @@ const AdminProductEditPage = () => {
                     </div>
                   </div>
 
-                {product?.variant_types?.length === 0 ? (
-                  <div className="text-center py-8 bg-slate-50 rounded-lg">
-                    <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                    <p className="text-slate-600">No variant types yet</p>
-                    <p className="text-sm text-slate-500 mt-1">Add your first variant type to get started</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {product?.variant_types?.map((variantType) => (
-                      <div key={variantType._id} className="border border-slate-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium text-slate-900">{variantType.name}</h4>
-                          <button
-                            onClick={() => handleDeleteVariantType(variantType._id)}
-                            className="text-red-600 hover:text-red-700 p-1"
-                            disabled={isDeletingVariantType}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        {/* Options Management */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-slate-600">Options:</span>
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => addOptionInput(variantType._id)}
+                  {product?.variant_types?.length === 0 ? (
+                    <div className="text-center py-8 bg-slate-50 rounded-lg">
+                      <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                      <p className="text-slate-600">No variant types yet</p>
+                      <p className="text-sm text-slate-500 mt-1">Add your first variant type to get started</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {product?.variant_types?.map((variantType) => (
+                        <div key={variantType._id} className="border border-slate-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-medium text-slate-900">{variantType.name}</h4>
+                            <button
+                              onClick={() => handleDeleteVariantType(variantType._id)}
+                              className="text-red-600 hover:text-red-700 p-1"
+                              disabled={isDeletingVariantType}
                             >
-                              <Plus className="w-3 h-3 mr-1" />
-                              Add Option
-                            </Button>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
 
-                          {/* Existing Options */}
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {variantType.options?.map((option) => (
-                              <div
-                                key={option._id}
-                                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700 group"
-                              >
-                                {option.value}
-                                <button
-                                  onClick={() => handleDeleteOption(option._id)}
-                                  className="ml-2 text-slate-500 hover:text-red-600"
-                                  disabled={isDeletingOption}
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* New Options Input */}
-                          {(newOptions[variantType._id] || []).map((option, index) => (
-                            <div key={index} className="flex items-center space-x-2">
-                              <input
-                                type="text"
-                                value={option}
-                                onChange={(e) => handleOptionInputChange(variantType._id, index, e.target.value)}
-                                placeholder="Option value"
-                                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                              <Button
-                                size="sm"
-                                onClick={() => handleAddOption(variantType._id)}
-                                disabled={!option.trim() || isAddingOption}
-                              >
-                                Add
-                              </Button>
+                          {/* Options Management */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-slate-600">Options:</span>
                               <Button
                                 size="sm"
                                 variant="secondary"
-                                onClick={() => removeOptionInput(variantType._id, index)}
+                                onClick={() => addOptionInput(variantType._id)}
                               >
-                                <X className="w-4 h-4" />
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add Option
                               </Button>
                             </div>
-                          ))}
+
+                            {/* Existing Options */}
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {variantType.options?.map((option) => (
+                                <div
+                                  key={option._id}
+                                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700 group"
+                                >
+                                  {option.value}
+                                  <button
+                                    onClick={() => handleDeleteOption(option._id)}
+                                    className="ml-2 text-slate-500 hover:text-red-600"
+                                    disabled={isDeletingOption}
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* New Options Input */}
+                            {(newOptions[variantType._id] || []).map((option, index) => (
+                              <div key={index} className="flex items-center space-x-2">
+                                <input
+                                  type="text"
+                                  value={option}
+                                  onChange={(e) => handleOptionInputChange(variantType._id, index, e.target.value)}
+                                  placeholder="Option value"
+                                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAddOption(variantType._id)}
+                                  disabled={!option.trim() || isAddingOption}
+                                >
+                                  Add
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => removeOptionInput(variantType._id, index)}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Combinations Management */}
@@ -656,9 +666,11 @@ const AdminProductEditPage = () => {
                               {editingCombination === combination._id ? (
                                 <input
                                   type="number"
-                                  defaultValue={combination.stock}
+                                  value={editingValues.stock}
+                                  onChange={(e) => handleEditingValueChange('stock', e.target.value)}
                                   min="0"
                                   className="w-20 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Stock"
                                   id={`stock-${combination._id}`}
                                 />
                               ) : (
@@ -674,10 +686,12 @@ const AdminProductEditPage = () => {
                               {editingCombination === combination._id ? (
                                 <input
                                   type="number"
-                                  defaultValue={combination.additional_price}
+                                  value={editingValues.additional_price}
+                                  onChange={(e) => handleEditingValueChange('additional_price', e.target.value)}
                                   min="0"
                                   step="0.01"
                                   className="w-24 px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Price"
                                   id={`price-${combination._id}`}
                                 />
                               ) : (
@@ -697,11 +711,9 @@ const AdminProductEditPage = () => {
                                   <Button
                                     size="sm"
                                     onClick={() => {
-                                      const stockInput = document.getElementById(`stock-${combination._id}`);
-                                      const priceInput = document.getElementById(`price-${combination._id}`);
                                       handleUpdateCombination(combination._id, {
-                                        stock: parseInt(stockInput.value) || 0,
-                                        additional_price: parseFloat(priceInput.value) || 0
+                                        stock: parseInt(editingValues.stock) || 0,
+                                        additional_price: parseFloat(editingValues.additional_price) || 0
                                       });
                                     }}
                                     disabled={isUpdatingCombination}
@@ -711,7 +723,10 @@ const AdminProductEditPage = () => {
                                   <Button
                                     size="sm"
                                     variant="secondary"
-                                    onClick={() => setEditingCombination(null)}
+                                    onClick={() => {
+                                      setEditingCombination(null);
+                                      setEditingValues({ stock: '', additional_price: '' });
+                                    }}
                                   >
                                     Cancel
                                   </Button>
@@ -720,7 +735,7 @@ const AdminProductEditPage = () => {
                                 <Button
                                   size="sm"
                                   variant="secondary"
-                                  onClick={() => setEditingCombination(combination._id)}
+                                  onClick={() => startEditingCombination(combination)}
                                 >
                                   <Edit3 className="w-3 h-3 mr-1" />
                                   Edit
@@ -748,7 +763,6 @@ const AdminProductEditPage = () => {
                 </div>
               )}
             </div>
-            </>
           )}
         </div>
       </div>
@@ -769,7 +783,6 @@ const AdminProductEditPage = () => {
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
-    </div>
     </div>
   );
 }

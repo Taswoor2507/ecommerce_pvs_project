@@ -3,19 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Download, 
   Eye, 
   Edit, 
-  Trash2, 
-  MoreHorizontal,
-  Package,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Box,
-  Tag,
-  Star
+  Trash2,
+  Package
 } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Pagination from '../components/ui/Pagination.jsx';
@@ -24,49 +16,23 @@ import { useProducts } from '../hooks/useProducts.js';
 const AdminProductsPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Fixed items per page for now
 
   // Fetch real products data from database with pagination
-  const { products, pagination, stats, isLoading, isError, error, deleteProduct } = useProducts({
+  const { products, pagination, isLoading, isError, error, deleteProduct } = useProducts({
     page: currentPage,
     limit: itemsPerPage,
     search: searchQuery,
-    category: selectedCategory !== 'all' ? selectedCategory : undefined,
-    status: selectedStatus !== 'all' ? selectedStatus : undefined,
   });
-
-  // Get unique categories from products
-  const categories = ['all', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
-  
-  // Status options
-  const statuses = [
-    { value: 'all', label: 'All Statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'out-of-stock', label: 'Out of Stock' },
-    { value: 'low-stock', label: 'Low Stock' }
-  ];
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // Reset to first page when filters change
+  // Reset to first page when search changes
   const handleSearchChange = (value) => {
     setSearchQuery(value);
-    setCurrentPage(1);
-  };
-
-  const handleCategoryChange = (value) => {
-    setSelectedCategory(value);
-    setCurrentPage(1);
-  };
-
-  const handleStatusChange = (value) => {
-    setSelectedStatus(value);
     setCurrentPage(1);
   };
 
@@ -81,33 +47,7 @@ const AdminProductsPage = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      'active': { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Active' },
-      'inactive': { bg: 'bg-slate-100', text: 'text-slate-700', label: 'Inactive' },
-      'out-of-stock': { bg: 'bg-red-100', text: 'text-red-700', label: 'Out of Stock' },
-      'low-stock': { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Low Stock' }
-    };
-    
-    const config = statusConfig[status] || statusConfig['active'];
-    return (
-      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}>
-        {config.label}
-      </span>
-    );
-  };
-
-  const getTrendIcon = (trend) => {
-    switch (trend) {
-      case 'up':
-        return <TrendingUp className="w-4 h-4 text-emerald-600" />;
-      case 'down':
-        return <TrendingDown className="w-4 h-4 text-red-600" />;
-      default:
-        return <div className="w-4 h-4" />;
-    }
-  };
-
+  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -128,106 +68,18 @@ const AdminProductsPage = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600 font-medium">Total Products</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600 font-medium">Active Products</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
-            </div>
-            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <Box className="w-6 h-6 text-emerald-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600 font-medium">Low Stock Items</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.lowStock}</p>
-            </div>
-            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-              <Tag className="w-6 h-6 text-amber-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600 font-medium">Total Sales</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {stats.totalSales}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
+      
+      {/* Search */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 shadow-lg">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Category Filter */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            className="px-4 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {categories.map(category => (
-              <option key={category} value={category}>
-                {category === 'all' ? 'All Categories' : category}
-              </option>
-            ))}
-          </select>
-
-          {/* Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            className="px-4 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {statuses.map(status => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-
-          <Button variant="secondary" size="sm">
-            <Filter className="w-4 h-4 mr-2" />
-            More Filters
-          </Button>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
       </div>
 
@@ -264,22 +116,10 @@ const AdminProductsPage = () => {
                       SKU
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                       Price
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                       Stock
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                      Sales
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                      Rating
                     </th>
                     <th className="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
                       Actions
@@ -303,34 +143,16 @@ const AdminProductsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                         {product.sku || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                        {product.category || 'Uncategorized'}
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
                         ${product.base_price || product.price || '0.00'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-sm font-semibold ${
-                            (product.stock === 0 || product.total_stock === 0) ? 'text-red-600' :
+                        <span className={`text-sm font-semibold ${
+                          (product.stock === 0 || product.total_stock === 0) ? 'text-red-600' :
                             ((product.stock < 10) || (product.total_stock < 10)) ? 'text-amber-600' : 'text-emerald-600'
                           }`}>
-                            {product.stock || product.total_stock || 0}
-                          </span>
-                          {getTrendIcon(product.trend)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(product.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                        {product.sales || 0}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-amber-400 fill-current" />
-                          <span className="text-sm text-slate-600">{product.rating || '0.0'}</span>
-                        </div>
+                          {product.stock || product.total_stock || 0}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">

@@ -56,23 +56,11 @@ export const useProducts = (params = {}) => {
     limit: defaultParams.limit
   };
 
-  // Calculate statistics safely
-  const stats = {
-    total: products.length,
-    active: products.filter(p => p.status === 'active').length,
-    outOfStock: products.filter(p => p.stock === 0).length,
-    lowStock: products.filter(p => p.stock > 0 && p.stock < 10).length,
-    totalSales: products.reduce((sum, p) => sum + (p.sales || 0), 0),
-    totalRevenue: products
-      .filter(p => p.status === 'completed')
-      .reduce((sum, p) => sum + (p.total || 0), 0),
-  };
-
+  
   return {
     // Data
     products,
     pagination,
-    stats,
     
     // States
     isLoading,

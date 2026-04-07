@@ -3,23 +3,11 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Menu, 
   X, 
-  LayoutDashboard, 
   Package, 
-  ShoppingCart, 
-  Users, 
-  Settings, 
   ChevronDown,
   ChevronRight,
-  LogOut,
-  Bell,
   Search,
-  Plus,
-  TrendingUp,
-  DollarSign,
-  Box,
-  Tag,
-  FileText,
-  HelpCircle
+  Plus
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -32,64 +20,13 @@ const AdminLayout = () => {
   // Navigation items configuration
   const navigationItems = [
     {
-      title: 'Dashboard',
-      icon: LayoutDashboard,
-      path: '/admin',
-      badge: null
-    },
-    {
       title: 'Products',
       icon: Package,
       path: '/admin/products',
-      badge: 'New',
+      badge: null,
       children: [
         { title: 'All Products', path: '/admin/products' },
-        { title: 'Create Product', path: '/admin/products/create' },
-        { title: 'Categories', path: '/admin/categories' },
-        { title: 'Inventory', path: '/admin/inventory' }
-      ]
-    },
-    {
-      title: 'Orders',
-      icon: ShoppingCart,
-      path: '/admin/orders',
-      badge: '12',
-      children: [
-        { title: 'All Orders', path: '/admin/orders' },
-        { title: 'Pending', path: '/admin/orders?status=pending' },
-        { title: 'Processing', path: '/admin/orders?status=processing' },
-        { title: 'Completed', path: '/admin/orders?status=completed' }
-      ]
-    },
-    {
-      title: 'Customers',
-      icon: Users,
-      path: '/admin/customers',
-      children: [
-        { title: 'All Customers', path: '/admin/customers' },
-        { title: 'Customer Groups', path: '/admin/customer-groups' }
-      ]
-    },
-    {
-      title: 'Analytics',
-      icon: TrendingUp,
-      path: '/admin/analytics',
-      children: [
-        { title: 'Overview', path: '/admin/analytics' },
-        { title: 'Sales Report', path: '/admin/analytics/sales' },
-        { title: 'Product Performance', path: '/admin/analytics/products' },
-        { title: 'Customer Insights', path: '/admin/analytics/customers' }
-      ]
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      path: '/admin/settings',
-      children: [
-        { title: 'General', path: '/admin/settings' },
-        { title: 'Payment', path: '/admin/settings/payment' },
-        { title: 'Shipping', path: '/admin/settings/shipping' },
-        { title: 'Taxes', path: '/admin/settings/taxes' }
+        { title: 'Create Product', path: '/admin/products/create' }
       ]
     }
   ];
@@ -164,10 +101,10 @@ const AdminLayout = () => {
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200/60 bg-white/50">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-              <LayoutDashboard className="w-4 h-4 text-white" />
+              <Package className="w-4 h-4 text-white" />
             </div>
             <span className={`font-bold text-xl text-slate-900 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}>
-              Admin Panel
+              Product Admin
             </span>
           </div>
           <button
@@ -266,10 +203,9 @@ const AdminLayout = () => {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-slate-200/60 bg-white/50">
-          <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group">
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
-          </button>
+          <div className="text-center text-sm text-slate-500">
+            Product Management System
+          </div>
         </div>
       </aside>
 
@@ -291,23 +227,13 @@ const AdminLayout = () => {
                 <span>Admin</span>
                 <span>/</span>
                 <span className="text-slate-900 font-medium">
-                  {location.pathname === '/admin' && 'Dashboard'}
                   {location.pathname.startsWith('/admin/products') && 'Products'}
-                  {location.pathname.startsWith('/admin/orders') && 'Orders'}
-                  {location.pathname.startsWith('/admin/customers') && 'Customers'}
-                  {location.pathname.startsWith('/admin/analytics') && 'Analytics'}
-                  {location.pathname.startsWith('/admin/settings') && 'Settings'}
+                  {!location.pathname.startsWith('/admin/products') && 'Products'}
                 </span>
               </nav>
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <button className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200">
-                <Bell className="w-5 h-5 text-slate-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
               {/* User Profile */}
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
