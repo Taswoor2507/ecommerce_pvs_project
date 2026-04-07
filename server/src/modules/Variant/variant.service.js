@@ -12,6 +12,11 @@ async function addVariantTypeService(productId, name, optionValues) {
   const product = await Product.findOne({ _id: productId, is_active: true });
   if (!product) throw new ApiError(404, 'Product not found');
 
+  // Check if product has stock - prevent variant creation if stock exists
+  if (product.stock && product.stock > 0) {
+    throw new ApiError(400, 'Cannot create variants for a product that has stock. Please set the product stock to 0 before adding variants.');
+  }
+
   // Deduplicate options (case-insensitive)
   const seen = new Set();
   const uniqueOptions = [];
