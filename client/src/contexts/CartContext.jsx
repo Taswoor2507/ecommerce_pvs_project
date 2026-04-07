@@ -1,83 +1,94 @@
-import { useReducer, useCallback, useEffect, useMemo } from 'react';
-import { CartContext } from './cart.context';
+import { useReducer, useCallback, useMemo} from 'react';
 
+// Action constants
+const CART_ACTIONS = {
+  ADD: 'ADD_ITEM',
+  REMOVE: 'REMOVE_ITEM',
+  UPDATE: 'UPDATE_QUANTITY',
+  CLEAR: 'CLEAR_CART',
+  TOGGLE: 'TOGGLE_CART',
+  OPEN: 'OPEN_CART',
+  CLOSE: 'CLOSE_CART',
+  LOAD: 'LOAD_CART',
+};
+
+// LocalStorage key
 const CART_STORAGE_KEY = 'ecommerce_cart';
 
+// Initial state
 const initialState = {
   items: [],
   isOpen: false,
 };
 
+// Reducer
 const cartReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD_ITEM': {
+    case CART_ACTIONS.ADD: {
+      const { productId, combinationId, quantity, price } = action.payload;
       const existingIndex = state.items.findIndex(
-        item => item.productId === action.payload.productId && 
-                item.combinationId === action.payload.combinationId
+        item => item.productId === productId && item.combinationId === combinationId
       );
 
       if (existingIndex >= 0) {
         const updatedItems = [...state.items];
         updatedItems[existingIndex] = {
           ...updatedItems[existingIndex],
-          quantity: updatedItems[existingIndex].quantity + action.payload.quantity
+          quantity: updatedItems[existingIndex].quantity + quantity,
         };
         return { ...state, items: updatedItems };
       }
 
+      return { ...state, items: [...state.items, { productId, combinationId, quantity, price }] };
+    }
+
+    case CART_ACTIONS.REMOVE: {
+      const { productId, combinationId } = action.payload;
       return {
         ...state,
-        items: [...state.items, action.payload]
+        items: state.items.filter(item => !(item.productId === productId && item.combinationId === combinationId)),
       };
     }
 
-    case 'REMOVE_ITEM': {
-      return {
-        ...state,
-        items: state.items.filter(
-          item => !(item.productId === action.payload.productId && 
-                    item.combinationId === action.payload.combinationId)
-        )
-      };
-    }
-
-    case 'UPDATE_QUANTITY': {
+    case CART_ACTIONS.UPDATE: {
+      const { productId, combinationId, quantity } = action.payload;
+      if (quantity <= 0) {
+        return {
+          ...state,
+          items: state.items.filter(item => !(item.productId === productId && item.combinationId === combinationId)),
+        };
+      }
       return {
         ...state,
         items: state.items.map(item =>
-          item.productId === action.payload.productId && 
-          item.combinationId === action.payload.combinationId
-            ? { ...item, quantity: action.payload.quantity }
+          item.productId === productId && item.combinationId === combinationId
+            ? { ...item, quantity }
             : item
-        )
+        ),
       };
     }
 
-    case 'CLEAR_CART': {
+    case CART_ACTIONS.CLEAR:
       return { ...state, items: [] };
-    }
 
-    case 'TOGGLE_CART': {
+    case CART_ACTIONS.TOGGLE:
       return { ...state, isOpen: !state.isOpen };
-    }
 
-    case 'OPEN_CART': {
+    case CART_ACTIONS.OPEN:
       return { ...state, isOpen: true };
-    }
 
-    case 'CLOSE_CART': {
+    case CART_ACTIONS.CLOSE:
       return { ...state, isOpen: false };
-    }
 
-    case 'LOAD_CART': {
+    case CART_ACTIONS.LOAD:
       return { ...state, items: action.payload };
-    }
 
     default:
       return state;
   }
 };
 
+// LocalStorage helpers
 const loadCartFromStorage = () => {
   try {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
@@ -91,88 +102,60 @@ const saveCartToStorage = (items) => {
   try {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   } catch {
-    // Ignore storage errors
+    // ignore
   }
 };
 
+
+
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  // Lazy init reducer from storage (no extra render)
+  const [state, dispatch] = useReducer(cartReducer, initialState, (init) => ({
+    ...init,
+    items: loadCartFromStorage(),
+  }));
 
-  useEffect(() => {
-    const savedItems = loadCartFromStorage();
-    if (savedItems.length > 0) {
-      dispatch({ type: 'LOAD_CART', payload: savedItems });
-    }
-  }, []);
+  // Save cart to localStorage
+  useMemo(() => saveCartToStorage(state.items), [state.items]);
 
-  useEffect(() => {
-    saveCartToStorage(state.items);
-  }, [state.items]);
-
-  const addItem = useCallback((item) => {
-    dispatch({ type: 'ADD_ITEM', payload: item });
-  }, []);
-
-  const removeItem = useCallback((productId, combinationId) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: { productId, combinationId } });
-  }, []);
-
+  // Actions
+  const addItem = useCallback((item) => dispatch({ type: CART_ACTIONS.ADD, payload: item }), []);
+  const removeItem = useCallback(
+    (productId, combinationId) => dispatch({ type: CART_ACTIONS.REMOVE, payload: { productId, combinationId } }),
+    []
+  );
   const updateQuantity = useCallback((productId, combinationId, quantity) => {
-    if (quantity <= 0) {
-      removeItem(productId, combinationId);
-      return;
-    }
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, combinationId, quantity } });
-  }, [removeItem]);
-
-  const clearCart = useCallback(() => {
-    dispatch({ type: 'CLEAR_CART' });
+    dispatch({ type: CART_ACTIONS.UPDATE, payload: { productId, combinationId, quantity } });
   }, []);
+  const clearCart = useCallback(() => dispatch({ type: CART_ACTIONS.CLEAR }), []);
+  const toggleCart = useCallback(() => dispatch({ type: CART_ACTIONS.TOGGLE }), []);
+  const openCart = useCallback(() => dispatch({ type: CART_ACTIONS.OPEN }), []);
+  const closeCart = useCallback(() => dispatch({ type: CART_ACTIONS.CLOSE }), []);
 
-  const toggleCart = useCallback(() => {
-    dispatch({ type: 'TOGGLE_CART' });
-  }, []);
-
-  const openCart = useCallback(() => {
-    dispatch({ type: 'OPEN_CART' });
-  }, []);
-
-  const closeCart = useCallback(() => {
-    dispatch({ type: 'CLOSE_CART' });
-  }, []);
-
+  // Totals (memoized)
   const totals = useMemo(() => {
     return {
-      // Count unique line items (distinct products/variants), not total quantity
       uniqueItemsCount: state.items.length,
-      // Total quantity across all items
       totalQuantity: state.items.reduce((sum, item) => sum + item.quantity, 0),
       subtotal: state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     };
   }, [state.items]);
 
-  const value = useMemo(() => ({
-    items: state.items,
-    isOpen: state.isOpen,
-    // Cart icon badge shows unique items count (not total quantity)
-    totalCount: totals.uniqueItemsCount,
-    // Total items count for reference
-    totalQuantity: totals.totalQuantity,
-    subtotal: totals.subtotal,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    toggleCart,
-    openCart,
-    closeCart,
-  }), [state.items, state.isOpen, totals, addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart]);
-
   return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
+    <CartStateContext.Provider
+      value={{
+        items: state.items,
+        isOpen: state.isOpen,
+        totalCount: totals.uniqueItemsCount,
+        totalQuantity: totals.totalQuantity,
+        subtotal: totals.subtotal,
+      }}
+    >
+      <CartActionsContext.Provider
+        value={{ addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart }}
+      >
+        {children}
+      </CartActionsContext.Provider>
+    </CartStateContext.Provider>
   );
 };
-
-export default CartContext;
