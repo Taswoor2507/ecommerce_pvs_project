@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
-import { useCart } from './useCart';
+import { useCallback, useContext } from 'react';
+import { CartActionsContext } from '../contexts/cart.context';
 
 export const useCartActions = () => {
-  const { addItem, openCart } = useCart();
+  const { addItem, openCart } = useContext(CartActionsContext);
 
   const addToCart = useCallback((product, combination, quantity = 1) => {
     const cartItem = {

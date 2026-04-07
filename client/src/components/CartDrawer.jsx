@@ -100,7 +100,7 @@ const CartDrawer = () => {
                       variant="danger"
                       size="sm"
                       onClick={() => removeItem(item.productId, item.combinationId)}
-                      ariaLabel="Remove item"
+                      aria-label="Remove item"
                       className="ml-auto"
                     />
                   </div>

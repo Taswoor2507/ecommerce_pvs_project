@@ -67,7 +67,7 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
           size="md"
           onClick={() => handlePageClick(currentPage - 1)}
           isDisabled={currentPage === 1}
-          ariaLabel="Go to previous page"
+          aria-label="Go to previous page"
           className="border border-gray-300"
         />
 
@@ -90,7 +90,7 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
                   size="sm"
                   rounded="lg"
                   className="min-w-[40px]"
-                  ariaLabel={`Go to page ${pageNum}`}
+                  aria-label={`Go to page ${pageNum}`}
                   aria-current={pageNum === currentPage ? 'page' : undefined}
                   aria-pressed={pageNum === currentPage}
                 >
@@ -108,7 +108,7 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
           size="md"
           onClick={() => handlePageClick(currentPage + 1)}
           isDisabled={currentPage === totalPages}
-          ariaLabel="Go to next page"
+          aria-label="Go to next page"
           className="border border-gray-300"
         />
       </nav>

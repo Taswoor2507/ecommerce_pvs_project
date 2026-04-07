@@ -54,6 +54,7 @@ const Button = forwardRef(({
   fullWidth = false,
   className = '',
   type = 'button',
+  'aria-label': ariaLabel,
   ...props
 }, ref) => {
   const isButtonDisabled = isDisabled || isLoading;
@@ -78,6 +79,7 @@ const Button = forwardRef(({
       type={type}
       className={baseClasses}
       disabled={isButtonDisabled}
+      aria-label={ariaLabel}
       {...props}
     >
       {isLoading && (

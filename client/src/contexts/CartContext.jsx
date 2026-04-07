@@ -1,4 +1,5 @@
-import { useReducer, useCallback, useMemo} from 'react';
+import { useReducer, useCallback, useMemo } from 'react';
+import { CartStateContext, CartActionsContext } from './cart.context';
 
 // Action constants
 const CART_ACTIONS = {

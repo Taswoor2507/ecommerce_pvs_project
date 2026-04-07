@@ -83,7 +83,7 @@ const Drawer = ({
             variant="ghost"
             size="md"
             onClick={onClose}
-            ariaLabel="Close drawer"
+            aria-label="Close drawer"
           />
         </div>
 
