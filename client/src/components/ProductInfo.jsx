@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ShoppingCart, AlertCircle, Check, Package, Tag } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import Button from './ui/Button';
@@ -23,6 +23,13 @@ const ProductInfo = ({
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // Reset quantity to 1 when stock becomes unavailable or combination changes
+  useEffect(() => {
+    if (!inStock || stock === 0) {
+      setQuantity(1);
+    }
+  }, [inStock, stock]);
 
   // Determine the display price
   const displayPrice = finalPrice !== null ? finalPrice : basePrice;
@@ -89,41 +96,43 @@ const ProductInfo = ({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Price Card */}
-      <div className="bg-gray-50 rounded-xl p-5 space-y-3">
-        {/* Base Price Row */}
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Base Price</span>
-          <span className="font-medium text-gray-900">{formatCurrency(basePrice)}</span>
-        </div>
-
-        {/* Variant Additional Row (if applicable) */}
-        {hasPriceVariation && (
+      {/* Price Card - Only show when in stock */}
+      {inStock && stock > 0 && (
+        <div className="bg-gray-50 rounded-xl p-5 space-y-3">
+          {/* Base Price Row */}
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5" />
-              Variant Additional
-            </span>
-            <span className="font-medium text-indigo-600">+{formatCurrency(additionalPrice)}</span>
+            <span className="text-gray-600">Base Price</span>
+            <span className="font-medium text-gray-900">{formatCurrency(basePrice)}</span>
           </div>
-        )}
 
-        {/* Divider */}
-        <div className="border-t border-gray-200 pt-3 mt-3">
-          {/* Total - BIG TEXT */}
-          <div className="flex justify-between items-baseline">
-            <span className="text-lg font-semibold text-gray-900">Total</span>
-            <span className="text-4xl font-bold text-indigo-600 tracking-tight">
-              {formatCurrency(totalPrice)}
-            </span>
-          </div>
-          {quantity > 1 && (
-            <div className="text-right text-sm text-gray-500 mt-1">
-              {quantity} items × {formatCurrency(displayPrice)}
+          {/* Variant Additional Row (if applicable) */}
+          {hasPriceVariation && (
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600 flex items-center gap-1">
+                <Tag className="w-3.5 h-3.5" />
+                Variant Additional
+              </span>
+              <span className="font-medium text-indigo-600">+{formatCurrency(additionalPrice)}</span>
             </div>
           )}
+
+          {/* Divider */}
+          <div className="border-t border-gray-200 pt-3 mt-3">
+            {/* Total - BIG TEXT */}
+            <div className="flex justify-between items-baseline">
+              <span className="text-lg font-semibold text-gray-900">Total</span>
+              <span className="text-4xl font-bold text-indigo-600 tracking-tight">
+                {formatCurrency(totalPrice)}
+              </span>
+            </div>
+            {quantity > 1 && (
+              <div className="text-right text-sm text-gray-500 mt-1">
+                {quantity} items × {formatCurrency(displayPrice)}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Stock Status */}
       <Badge

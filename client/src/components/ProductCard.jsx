@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { formatCurrency } from "../utils/format";
+import { isProductInStock, getStockStatusText, getStockBadgeVariant } from "../utils/stock.utils";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 
@@ -11,11 +12,12 @@ const ProductCard = ({ product, className = "", currentPage = 1 }) => {
     base_price,
     image,
     variant_type_count,
-    stock,
   } = product;
 
-  // Determine stock status for non-variant products
-  const isOutOfStock = variant_type_count === 0 && stock <= 0;
+  // Use DRY stock utility - backend returns correct stock for all product types
+  const outOfStock = !isProductInStock(product);
+  const stockBadgeVariant = getStockBadgeVariant(product);
+  const stockStatusText = getStockStatusText(product);
 
   // Handle image fallback - use backend default or fallback image
   const handleImageError = (e) => {
@@ -41,20 +43,18 @@ const ProductCard = ({ product, className = "", currentPage = 1 }) => {
           loading="lazy"
         />
         
-        {/* Variant Badge */}
-        {variant_type_count > 0 ? (
-          <div className="absolute top-3 right-3 shadow-lg">
-            <Badge variant="primary" size="sm" roundedFull>
-              {variant_type_count} {variant_type_count === 1 ? 'Variant' : 'Variants'}
+        {/* Stock Badge - Shows for all products */}
+        <div className="absolute top-3 right-3 shadow-lg">
+          {variant_type_count > 0 ? (
+            <Badge variant={stockBadgeVariant} size="sm" roundedFull>
+              {stockStatusText} • {variant_type_count} {variant_type_count === 1 ? 'Variant' : 'Variants'}
             </Badge>
-          </div>
-        ) : (
-          <div className="absolute top-3 right-3 shadow-lg">
-            <Badge variant={stock > 0 ? "success" : "danger"} size="sm" roundedFull>
-              {stock > 0 ? "In Stock" : "Out of Stock"}
+          ) : (
+            <Badge variant={stockBadgeVariant} size="sm" roundedFull>
+              {stockStatusText}
             </Badge>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Quick View Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
@@ -96,8 +96,8 @@ const ProductCard = ({ product, className = "", currentPage = 1 }) => {
           </div>
           
           <Link to={`/products/${id}?page=${currentPage}`}>
-            <Button variant="primary" size="sm" isDisabled={isOutOfStock}>
-              {isOutOfStock ? "Out of Stock" : "View"}
+            <Button variant="primary" size="sm" isDisabled={outOfStock}>
+              {outOfStock ? "Out of Stock" : "View"}
             </Button>
           </Link>
         </div>

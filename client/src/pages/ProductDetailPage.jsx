@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useCartActions } from '../hooks/useCartActions';
 import { findMatchingCombination } from '../utils/findMatchingCombination';
+import { getStockBadgeVariant, getStockStatusText } from '../utils/stock.utils';
 import ProductImages from '../components/ProductImages';
 import VariantSelector from '../components/VariantSelector';
 import ProductInfo from '../components/ProductInfo';
@@ -35,6 +36,9 @@ const ProductDetailPage = () => {
     refetchProduct,
   } = useProductDetail(id);
 
+  // Track if we've initialized selected variants
+  const hasInitialized = useRef(false);
+
   // Initialize selectedVariants lazily based on firstAvailableCombo
   const [selectedVariants, setSelectedVariants] = useState(() => {
     if (!firstAvailableCombo) return {};
@@ -43,6 +47,22 @@ const ProductDetailPage = () => {
       return acc;
     }, {});
   });
+
+  // Auto-select first available combination when data loads (only once)
+  useEffect(() => {
+    if (hasInitialized.current) return;
+    
+    if (hasVariants && firstAvailableCombo && Object.keys(selectedVariants).length === 0) {
+      const initialSelection = firstAvailableCombo.option_labels.reduce((acc, label) => {
+        acc[label.type] = label.value;
+        return acc;
+      }, {});
+      queueMicrotask(() => {
+        setSelectedVariants(initialSelection);
+        hasInitialized.current = true;
+      });
+    }
+  }, [hasVariants, firstAvailableCombo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { addToCart } = useCartActions();
   // Check all variants selected
@@ -167,10 +187,10 @@ const ProductDetailPage = () => {
 
             {!hasVariants && (
               <div className="flex gap-2">
-                <Badge variant={product.stock > 0 ? "success" : "danger"}>
-                  {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                <Badge variant={getStockBadgeVariant(product)}>
+                  {getStockStatusText(product)}
                 </Badge>
-                <Badge variant="secondary">{product.stock} available</Badge>
+                <Badge variant="secondary">{product.stock || 0} available</Badge>
               </div>
             )}
 

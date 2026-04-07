@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { VariantType, Combination , Option , Product } from "../../models/index.js"
 import { ApiError } from '../../utils/apiError.js';
 import { getProductWithVariants } from '../../utils/cache.js';
+import { syncProductStockFromCombinations } from '../../utils/stock.utils.js';
 
 
 // ── Hash helpers ──────────────────────────────────────────────────────────────
@@ -464,6 +465,9 @@ async function updateCombinationService (comboId, payload) {
   );
 
   if (!combo) throw new ApiError(404, "Combination not found");
+
+  // Sync product stock from all combinations
+  await syncProductStockFromCombinations(combo.product_id);
 
   // Fetch product base price
   const product = await Product.findById(combo.product_id)

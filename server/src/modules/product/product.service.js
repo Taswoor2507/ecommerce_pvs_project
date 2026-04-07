@@ -5,6 +5,7 @@ import ApiFeatures from "../../utils/ApiFeatures.js";
 import mongoose from "mongoose";
 import Combination from "../../models/combination.model.js";
 import { getProductWithVariants, invalidateProductCache } from "../../utils/cache.js";
+import { getProductStock } from "../../utils/stock.utils.js";
 
 // create product service
 const createProductService = async (payload) => {
@@ -49,15 +50,19 @@ const listProductsService = async (queryParams) => {
     // Get total count with applied filters and search
     const total = await countFeatures.query.countDocuments();
 
-    const mappedProducts = products.map((p) => ({
-        id: p._id.toString(),
-        name: p.name,
-        description: p.description,
-        base_price: p.base_price,
-        image: p.image,
-        stock: p.stock,
-        variant_type_count: p.variant_type_count,
-        createdAt: p.createdAt,
+    // Calculate stock for each product (sum of combinations for variant products)
+    const mappedProducts = await Promise.all(products.map(async (p) => {
+        const stock = await getProductStock(p);
+        return {
+            id: p._id.toString(),
+            name: p.name,
+            description: p.description,
+            base_price: p.base_price,
+            image: p.image,
+            stock: stock,
+            variant_type_count: p.variant_type_count,
+            createdAt: p.createdAt,
+        };
     }));
 
     return {
@@ -93,6 +98,19 @@ const updateProductService = async (productId, payload) => {
   
   if (!currentProduct) {
     throw new ApiError(404, "Product not found");
+  }
+
+  // Validation: Prevent stock updates for products with variants
+  // Stock for variant products is calculated from combination stocks
+  if (stock !== undefined && 
+      stock !== currentProduct.stock && 
+      currentProduct.variant_type_count > 0) {
+    throw new ApiError(
+      400, 
+      "Cannot update product stock directly because this product has variants. " +
+      "Please update the stock of each combination instead, " +
+      "or delete all variants to enable direct stock updates."
+    );
   }
 
   // Check if any values are actually different
