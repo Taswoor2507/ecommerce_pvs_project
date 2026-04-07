@@ -3,8 +3,8 @@ import { createProductService , deleteProductService, getProductService, listPro
 
 // create product controller
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, base_price } = req.body;
-    const product = await createProductService({ name, description, base_price });
+    const { name, description, base_price, stock } = req.body;
+    const product = await createProductService({ name, description, base_price, stock });
     res.status(201).json({
         success: true,
         message: "Product created successfully",
@@ -46,6 +46,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         name: updatedProduct.name,
         description: updatedProduct.description,
         base_price: updatedProduct.base_price,
+        stock: updatedProduct.stock,
         updatedAt: updatedProduct.updatedAt,
       },
     });
@@ -55,7 +56,14 @@ const updateProduct = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Product updated successfully",
-    data: updatedProduct,
+    data: {
+      id: updatedProduct.id,
+      name: updatedProduct.name,
+      description: updatedProduct.description,
+      base_price: updatedProduct.base_price,
+      stock: updatedProduct.stock,
+      updatedAt: updatedProduct.updatedAt,
+    },
   });
 });
 

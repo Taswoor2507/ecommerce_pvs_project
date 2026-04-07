@@ -28,6 +28,12 @@ const ProductSchema = new mongoose.Schema(
       default: 0,
       min:     0,
     },
+    // Stock for products without variants
+    stock: {
+      type:    Number,
+      default: 0,
+      min:     [0, 'Stock cannot be negative'],
+    },
     // Soft delete — 
     is_active: {
       type:    Boolean,

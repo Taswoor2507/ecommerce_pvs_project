@@ -9,7 +9,7 @@ export const useCartActions = () => {
       productId: product._id,
       combinationId: combination?._id || null,
       name: product.name,
-      image: product.image,
+      image: product.image || 'https://www.inkfactory.pk/wp-content/uploads/2019/08/T-Shirt-Mockup-007.jpg',
       price: combination?.final_price || product.base_price,
       originalPrice: product.base_price,
       quantity,

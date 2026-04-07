@@ -8,8 +8,8 @@ import { getProductWithVariants, invalidateProductCache } from "../../utils/cach
 
 // create product service
 const createProductService = async (payload) => {
-    const { name, description, base_price } = payload;
-    const product = await Product.create({ name, description, base_price });
+    const { name, description, base_price, stock } = payload;
+    const product = await Product.create({ name, description, base_price, stock });
     if (!product) {
         throw new ApiError(500, "Failed to create product");
     }
@@ -18,6 +18,7 @@ const createProductService = async (payload) => {
         name: product.name,
         description: product.description,
         base_price: product.base_price,
+        stock: product.stock,
         created_at: product.createdAt,
         updated_at: product.updatedAt
     };
@@ -54,6 +55,7 @@ const listProductsService = async (queryParams) => {
         description: p.description,
         base_price: p.base_price,
         image: p.image,
+        stock: p.stock,
         variant_type_count: p.variant_type_count,
         createdAt: p.createdAt,
     }));
@@ -84,7 +86,7 @@ const getProductService = async (productId) => {
 
 // update product 
 const updateProductService = async (productId, payload) => {
-  const { name, description, base_price } = payload;
+  const { name, description, base_price, stock } = payload;
 
   // First, get the current product to compare
   const currentProduct = await Product.findOne({ _id: productId, is_active: true });
@@ -97,7 +99,8 @@ const updateProductService = async (productId, payload) => {
   const hasChanges = 
     (name !== undefined && name !== currentProduct.name) ||
     (description !== undefined && description !== currentProduct.description) ||
-    (base_price !== undefined && base_price !== currentProduct.base_price);
+    (base_price !== undefined && base_price !== currentProduct.base_price) ||
+    (stock !== undefined && stock !== currentProduct.stock);
 
   // If no actual changes, return current product without updating
   if (!hasChanges) {
@@ -106,6 +109,7 @@ const updateProductService = async (productId, payload) => {
       name: currentProduct.name,
       description: currentProduct.description,
       base_price: currentProduct.base_price,
+      stock: currentProduct.stock,
       updatedAt: currentProduct.updatedAt,
       message: "No changes detected - product already up to date"
     };
@@ -125,6 +129,10 @@ const updateProductService = async (productId, payload) => {
     update.base_price = base_price;
     cacheInvalidationNeeded = true;
   }
+  if (stock !== undefined && stock !== currentProduct.stock) {
+    update.stock = stock;
+    cacheInvalidationNeeded = true;
+  }
 
   // Only perform update if there are changes
   const updatedProduct = await Product.findOneAndUpdate(
@@ -133,7 +141,7 @@ const updateProductService = async (productId, payload) => {
     { returnDocument: 'after', runValidators: true }
   );
 
-  // Invalidate cache only if price actually changed
+  // Invalidate cache only if price or stock actually changed
   if (cacheInvalidationNeeded) {
     await invalidateProductCache(productId);
   }
@@ -143,6 +151,7 @@ const updateProductService = async (productId, payload) => {
     name: updatedProduct.name,
     description: updatedProduct.description,
     base_price: updatedProduct.base_price,
+    stock: updatedProduct.stock,
     updatedAt: updatedProduct.updatedAt,
   };
 };

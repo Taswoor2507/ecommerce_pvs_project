@@ -78,7 +78,7 @@ const CartDrawer = () => {
                 {/* Product Details */}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                  {item.variants.length > 0 && (
+                  {item.variants?.length > 0 && (
                     <p className="text-sm text-gray-500 mt-1">
                       {item.variants.map(v => v.value).join(', ')}
                     </p>

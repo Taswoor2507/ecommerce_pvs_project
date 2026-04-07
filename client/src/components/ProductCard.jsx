@@ -11,7 +11,11 @@ const ProductCard = ({ product, className = "" }) => {
     base_price,
     image,
     variant_type_count,
+    stock,
   } = product;
+
+  // Determine stock status for non-variant products
+  const isOutOfStock = variant_type_count === 0 && stock <= 0;
 
   // Handle image fallback - use backend default or fallback image
   const handleImageError = (e) => {
@@ -38,10 +42,16 @@ const ProductCard = ({ product, className = "" }) => {
         />
         
         {/* Variant Badge */}
-        {variant_type_count > 0 && (
+        {variant_type_count > 0 ? (
           <div className="absolute top-3 right-3 shadow-lg">
             <Badge variant="primary" size="sm" roundedFull>
               {variant_type_count} {variant_type_count === 1 ? 'Variant' : 'Variants'}
+            </Badge>
+          </div>
+        ) : (
+          <div className="absolute top-3 right-3 shadow-lg">
+            <Badge variant={stock > 0 ? "success" : "danger"} size="sm" roundedFull>
+              {stock > 0 ? "In Stock" : "Out of Stock"}
             </Badge>
           </div>
         )}
@@ -86,8 +96,8 @@ const ProductCard = ({ product, className = "" }) => {
           </div>
           
           <Link to={`/products/${id}`}>
-            <Button variant="primary" size="sm">
-              View
+            <Button variant="primary" size="sm" isDisabled={isOutOfStock}>
+              {isOutOfStock ? "Out of Stock" : "View"}
             </Button>
           </Link>
         </div>

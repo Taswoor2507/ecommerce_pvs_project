@@ -26,7 +26,8 @@ const initialState = {
 const cartReducer = (state, action) => {
   switch (action.type) {
     case CART_ACTIONS.ADD: {
-      const { productId, combinationId, quantity, price } = action.payload;
+      const newItem = action.payload;
+      const { productId, combinationId, quantity } = newItem;
       const existingIndex = state.items.findIndex(
         item => item.productId === productId && item.combinationId === combinationId
       );
@@ -40,7 +41,7 @@ const cartReducer = (state, action) => {
         return { ...state, items: updatedItems };
       }
 
-      return { ...state, items: [...state.items, { productId, combinationId, quantity, price }] };
+      return { ...state, items: [...state.items, newItem] };
     }
 
     case CART_ACTIONS.REMOVE: {

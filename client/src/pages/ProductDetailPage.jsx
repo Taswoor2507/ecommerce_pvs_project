@@ -165,6 +165,15 @@ const ProductDetailPage = () => {
               </div>
             )}
 
+            {!hasVariants && (
+              <div className="flex gap-2">
+                <Badge variant={product.stock > 0 ? "success" : "danger"}>
+                  {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                </Badge>
+                <Badge variant="secondary">{product.stock} available</Badge>
+              </div>
+            )}
+
             <p className="text-gray-600">{product.description}</p>
 
             {hasVariants && (
