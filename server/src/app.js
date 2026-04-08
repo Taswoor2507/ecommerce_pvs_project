@@ -8,6 +8,8 @@ import { productRouter } from './modules/product/product.route.js';
 import variantRouter from './modules/Variant/variant.route.js';
 import { combinationRouter } from './modules/combinations/combination.route.js';
 import { orderRouter } from './modules/order/order.route.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 
 const app = express();
 // CORS
@@ -27,6 +29,9 @@ app.use(express.urlencoded({ limit: '20kb', extended: true }));
 
 // Cookie parser
 app.use(cookieParser());
+
+// Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Module Routes 
 // auth router
