@@ -228,6 +228,25 @@ The API follows a standard RESTful architecture. All available endpoints — inc
 
 ---
 
+# 🔐 Role-Based Access Control (Admin Access Required)
+
+This project implements role-based authorization to protect sensitive routes such as product management, variant creation, and stock handling.
+
+## 👤 Default User Role
+When a user registers:
+
+`POST /api/v1/auth/register`
+
+They are assigned the default role:
+
+```json
+{
+  "role": "user"
+}
+```
+
+#### So manually update it with admin role if you want to test admin features.
+
 ## 🛠️ Key Components & Concurrency
 
 ### Distributed Locking with Redis
