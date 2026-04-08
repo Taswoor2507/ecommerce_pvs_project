@@ -146,7 +146,7 @@ const AdminProductViewPage = () => {
       <PageHeader
         title={product.name}
         subtitle={`Product ID: ${product._id || product.id}`}
-        backTo="/admin/products"
+        onBack={() => navigate(-1)}
         backLabel="Back"
         actions={
           <>

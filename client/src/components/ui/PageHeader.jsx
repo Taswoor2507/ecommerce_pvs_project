@@ -6,22 +6,31 @@ const PageHeader = ({
   title,
   subtitle,
   backTo,
+  onBack,
   backLabel = 'Back',
   actions,
   className = '',
 }) => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(backTo);
+    }
+  };
+
   return (
     <div
       className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${className}`}
     >
       <div className="flex items-center gap-4 min-w-0">
-        {backTo && (
+        {(backTo || onBack) && (
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => navigate(backTo)}
+            onClick={handleBack}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {backLabel}

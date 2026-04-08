@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Plus, Download, Eye, Edit, Trash2, Package } from 'lucide-react';
 import Button from '../components/ui/Button';
 import PageHeader from '../components/ui/PageHeader';
@@ -15,8 +15,11 @@ import { useProducts } from '../hooks/useProducts';
 
 const AdminProductsPage = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const searchQuery = searchParams.get('search') || '';
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const {
@@ -33,10 +36,27 @@ const AdminProductsPage = () => {
     search: searchQuery,
   });
 
-  const handleSearchChange = (value) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  };
+  const updateParams = useCallback((newParams) => {
+    const nextParams = new URLSearchParams(searchParams);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value !== undefined) {
+        if (value) {
+          nextParams.set(key, value);
+        } else {
+          nextParams.delete(key);
+        }
+      }
+    });
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const handleSearchChange = useCallback((value) => {
+    updateParams({ search: value, page: '1' });
+  }, [updateParams]);
+
+  const setCurrentPage = useCallback((page) => {
+    updateParams({ page: page.toString() });
+  }, [updateParams]);
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
@@ -160,15 +180,17 @@ const AdminProductsPage = () => {
         }
       />
 
-      <Card>
-        <SearchInput
-          value={searchQuery}
-          onChange={handleSearchChange}
-          placeholder="Search products by name…"
-        />
-      </Card>
-
       <Card padding={false}>
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-700">Inventory Overview</h3>
+          <div className="w-64">
+            <SearchInput
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search products by name…"
+            />
+          </div>
+        </div>
         <DataTable
           columns={columns}
           data={products}

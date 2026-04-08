@@ -87,7 +87,7 @@ const AdminProductEditPage = () => {
       <PageHeader
         title="Edit Product"
         subtitle={`ID: ${product._id || product.id}`}
-        backTo={`/admin/products/${id}`}
+        onBack={() => navigate(-1)}
         backLabel="Back to Product"
         actions={
           <>

@@ -17,8 +17,8 @@ const SearchInput = ({
   }, [value]);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    // Only trigger onChange if the value has actually changed from what's in the parent
+    if (localValue === value) {
       return;
     }
 

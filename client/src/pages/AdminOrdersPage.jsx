@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ShoppingBag, Eye, Calendar, User, DollarSign } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import DataTable from '../components/ui/DataTable';
@@ -11,14 +12,31 @@ import { useOrders } from '../hooks/useOrders';
 import OrderDetailsModal from '../components/orders/OrderDetailsModal';
 
 const AdminOrdersPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const statusFilter = searchParams.get('status') || '';
+  
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleViewDetails = (id) => {
     setSelectedOrderId(id);
     setIsModalOpen(true);
+  };
+
+  const updateParams = (newParams) => {
+    const nextParams = new URLSearchParams(searchParams);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value !== undefined) {
+        if (value) {
+          nextParams.set(key, value);
+        } else {
+          nextParams.delete(key);
+        }
+      }
+    });
+    setSearchParams(nextParams, { replace: true });
   };
 
   const {
@@ -145,8 +163,7 @@ const AdminOrdersPage = () => {
             className="text-sm border-slate-200 rounded-lg focus:ring-indigo-500"
             value={statusFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setCurrentPage(1);
+              updateParams({ status: e.target.value, page: '1' });
             }}
           >
             <option value="">All Status</option>
@@ -176,7 +193,7 @@ const AdminOrdersPage = () => {
       {!isLoading && !isError && pagination && pagination.pages > 1 && (
         <Pagination 
           pagination={pagination} 
-          onPageChange={setCurrentPage} 
+          onPageChange={(page) => updateParams({ page: page.toString() })} 
         />
       )}
 
