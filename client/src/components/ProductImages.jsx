@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { ZoomIn } from 'lucide-react';
+import ImageWithFallback from './ui/ImageWithFallback';
+import { ZoomIn, Package } from 'lucide-react';
 
 const ProductImages = ({ 
   image, 
@@ -7,17 +8,6 @@ const ProductImages = ({
   className = '' 
 }) => {
   const [isZoomed, setIsZoomed] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  // Fallback image if fails
-  const fallbackImage = 'https://www.inkfactory.pk/wp-content/uploads/2019/08/T-Shirt-Mockup-007.jpg';
-  const placeholderImage = 'https://www.ub.edu/edicions13l/wp-content/themes/koji/assets/images/default-fallback-image.png';
-
-  const currentImage = image || fallbackImage;
-
-  const handleImageError = useCallback(() => {
-    setImageError(true);
-  }, []);
 
   const toggleZoom = useCallback(() => {
     setIsZoomed(prev => !prev);
@@ -27,15 +17,15 @@ const ProductImages = ({
     <div className={className}>
       {/* Main Image Container */}
       <div className="relative bg-gray-50 rounded-xl overflow-hidden aspect-square group">
-        <img
-          src={imageError ? placeholderImage : currentImage}
+        <ImageWithFallback
+          src={image}
           alt={productName}
           className={`
             w-full h-full object-cover transition-transform duration-500
             ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}
           `}
-          onError={handleImageError}
           onClick={toggleZoom}
+          fallbackIcon={Package}
         />
 
         {/* Zoom Overlay */}

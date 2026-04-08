@@ -3,6 +3,8 @@ import { formatCurrency } from "../utils/formatters";
 import { isProductInStock, getStockStatusText, getStockBadgeVariant } from "../utils/stock.utils";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
+import ImageWithFallback from "./ui/ImageWithFallback";
+import { Package } from "lucide-react";
 
 const ProductCard = ({ product, className = "", currentPage = 1 }) => {
   const {
@@ -19,28 +21,17 @@ const ProductCard = ({ product, className = "", currentPage = 1 }) => {
   const stockBadgeVariant = getStockBadgeVariant(product);
   const stockStatusText = getStockStatusText(product);
 
-  // Handle image fallback - use backend default or fallback image
-  const handleImageError = (e) => {
-    // Try backend default first, then fallback
-    if (!e.target.src.includes('t-shirt-mockup')) {
-      e.target.src = "https://www.inkfactory.pk/wp-content/uploads/2019/08/T-Shirt-Mockup-007.jpg";
-    } else {
-      e.target.src = "https://www.ub.edu/edicions13l/wp-content/themes/koji/assets/images/default-fallback-image.png";
-    }
-  };
-
   return (
     <div
       className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group border border-gray-100 ${className}`}
     >
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <img
+        <ImageWithFallback
           src={image}
           alt={name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={handleImageError}
-          loading="lazy"
+          fallbackIcon={Package}
         />
         
         {/* Stock Badge - Shows for all products */}
