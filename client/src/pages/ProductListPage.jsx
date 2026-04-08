@@ -29,11 +29,11 @@ const ProductListPage = () => {
       const messageTimer = setTimeout(() => {
         setSuccessMessage(message);
       }, 0);
-      
+
       const clearTimer = setTimeout(() => {
         setSuccessMessage(null);
       }, 5000);
-      
+
       return () => {
         clearTimeout(messageTimer);
         clearTimeout(clearTimer);
@@ -68,8 +68,7 @@ const ProductListPage = () => {
         limit: 12,
       }),
 
-    // 🔥 BEST PRACTICE
-    keepPreviousData: true, // smooth pagination
+    placeholderData: (previousData) => previousData,
     staleTime: 1000 * 30, // 30 sec cache
 
     retry: (failureCount, err) => {
@@ -109,17 +108,16 @@ const ProductListPage = () => {
     [searchTerm, updateParams]
   );
 
-  //  Pagination handler
+  // Stable Pagination handler
   const handlePageChange = useCallback(
     (newPage) => {
-      if (newPage === page || newPage < 1) return;
-
-      updateParams({ page: newPage });
-
-      //  No hack
-      // window.scrollTo({ top: 0, behavior: "smooth" });
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        next.set("page", newPage.toString());
+        return next;
+      }, { replace: true });
     },
-    [page, updateParams]
+    [setSearchParams]
   );
 
   // Error state

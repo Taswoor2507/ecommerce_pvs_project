@@ -11,6 +11,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog';
 import EmptyState from '../components/ui/EmptyState';
 import Card from '../components/ui/Card';
 import IconButton from '../components/ui/IconButton';
+import ImageWithFallback from '../components/ui/ImageWithFallback';
 import { useProducts } from '../hooks/useProducts';
 
 const AdminProductsPage = () => {
@@ -70,16 +71,13 @@ const AdminProductsPage = () => {
       title: 'Product',
       render: (_, row) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            {row.image ? (
-              <img
-                src={row.image}
-                alt={row.name}
-                className="w-full h-full object-cover rounded-lg"
-              />
-            ) : (
-              <Package className="w-5 h-5 text-slate-400" />
-            )}
+          <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <ImageWithFallback
+              src={row.image}
+              alt={row.name}
+              className="w-full h-full object-cover rounded-lg"
+              fallbackIcon={Package}
+            />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-900 truncate">

@@ -1,9 +1,14 @@
+import { memo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import IconButton from "./IconButton";
 import Button from "./Button";
 
-const Pagination = ({ pagination, onPageChange, className = "" }) => {
-  const { page: currentPage, pages: totalPages, total, limit } = pagination;
+/**
+ * A reusable, layout-stable pagination component.
+ * Wrapped in React.memo to prevent unnecessary flickers on parent re-renders.
+ */
+const Pagination = memo(({ pagination = {}, onPageChange, className = "" }) => {
+  const { page: currentPage = 1, pages: totalPages = 1, total = 0, limit = 10 } = pagination;
 
   if (totalPages <= 1) return null;
 
@@ -35,17 +40,14 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
   };
 
   const handlePageClick = (newPage) => {
-    // Validate the page number
     if (typeof newPage !== 'number' || newPage < 1 || newPage > totalPages) {
       return;
     }
 
-    // Don't do anything if clicking the same page
     if (newPage === currentPage) {
       return;
     }
-    
-    // Call the parent's page change handler
+
     onPageChange(newPage);
   };
 
@@ -54,8 +56,8 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
   return (
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
       {/* Results Info */}
-      <div className="text-sm text-gray-700 font-medium">
-        Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, total)} of {total} results
+      <div className="text-sm text-gray-500 font-medium">
+        Showing <span className="text-slate-900 font-semibold">{((currentPage - 1) * limit) + 1}</span> to <span className="text-slate-900 font-semibold">{Math.min(currentPage * limit, total)}</span> of <span className="text-slate-900 font-semibold">{total}</span> results
       </div>
 
       {/* Pagination Controls */}
@@ -76,11 +78,11 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
           {visiblePages.map((pageNum, index) => (
             <div key={`page-${pageNum}-${index}`}>
               {pageNum === '...' ? (
-                <span 
-                  className="px-3 py-2 text-gray-500 font-medium" 
+                <span
+                  className="px-3 py-2 text-gray-400 font-bold"
                   aria-hidden="true"
                 >
-                  ...
+                  ···
                 </span>
               ) : (
                 <Button
@@ -89,10 +91,9 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
                   variant={pageNum === currentPage ? "primary" : "secondary"}
                   size="sm"
                   rounded="lg"
-                  className="min-w-[40px]"
+                  className={`min-w-[40px] ${pageNum === currentPage ? 'shadow-md shadow-indigo-200' : 'border border-slate-200 hover:border-indigo-400'}`}
                   aria-label={`Go to page ${pageNum}`}
                   aria-current={pageNum === currentPage ? 'page' : undefined}
-                  aria-pressed={pageNum === currentPage}
                 >
                   {pageNum}
                 </Button>
@@ -114,6 +115,8 @@ const Pagination = ({ pagination, onPageChange, className = "" }) => {
       </nav>
     </div>
   );
-};
+});
+
+Pagination.displayName = 'Pagination';
 
 export default Pagination;
