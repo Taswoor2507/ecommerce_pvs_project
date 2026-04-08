@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { Combination, Product, Order } from "../../models/index.js";
 import { ApiError } from "../../utils/apiError.js";
+import { invalidateProductCache } from "../../utils/cache.js";
+import { syncProductStockFromCombinations } from "../../utils/stock.utils.js";
 
-async function placeOrderService(combinationId, quantity) {
+async function placeOrderService(combinationId, quantity, userId) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -66,6 +68,7 @@ async function placeOrderService(combinationId, quantity) {
         {
           combination_id: combo._id,
           product_id: combo.product_id,
+          user_id: userId,
           quantity,
           unit_price,
           total_price,
@@ -86,8 +89,14 @@ async function placeOrderService(combinationId, quantity) {
       { session }
     );
 
+    // Update denormalized total stock for the product (improves listing performance)
+    await syncProductStockFromCombinations(combo.product_id, session);
+
     // commit
     await session.commitTransaction();
+
+    // Sync Cache: Ensure stock data is fresh in Redis after order
+    await invalidateProductCache(combo.product_id.toString());
 
     return {
       order_id: order._id,

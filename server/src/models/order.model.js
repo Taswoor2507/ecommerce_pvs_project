@@ -6,6 +6,11 @@ const OrderSchema = new mongoose.Schema(
       ref:      'Combination',
       required: true,
     },
+    user_id: {
+      type:     mongoose.Schema.Types.ObjectId,
+      ref:      'User',
+      required: true,
+    },
     // Denormalized for fast order history display (avoid joining back to Combination)
     product_id: {
       type:     mongoose.Schema.Types.ObjectId,

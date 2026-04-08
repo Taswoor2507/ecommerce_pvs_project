@@ -1,17 +1,33 @@
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../utils/formatters';
 import Drawer from './ui/Drawer';
 import Button from './ui/Button';
 import IconButton from './ui/IconButton';
 import Badge from './ui/Badge';
 import QuantitySelector from './ui/QuantitySelector';
+import { toast } from 'react-hot-toast';
 
 const CartDrawer = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, totalCount } = useCart();
 
   const handleQuantityChange = (item, newQuantity) => {
     updateQuantity(item.productId, item.combinationId, newQuantity);
+  };
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to place an order');
+      closeCart();
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
+    }
+    closeCart();
+    navigate('/checkout');
   };
 
   const footerContent = items.length > 0 ? (
@@ -20,7 +36,12 @@ const CartDrawer = () => {
         <span className="text-gray-600">Subtotal</span>
         <span className="text-2xl font-bold text-gray-900">{formatCurrency(subtotal)}</span>
       </div>
-      <Button variant="primary" size="xl" fullWidth>
+      <Button 
+        variant="primary" 
+        size="xl" 
+        fullWidth
+        onClick={handleCheckout}
+      >
         Proceed to Checkout
       </Button>
       <Button variant="ghost" size="md" fullWidth onClick={closeCart}>

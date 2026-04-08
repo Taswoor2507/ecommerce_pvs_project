@@ -1,0 +1,28 @@
+import axios from '../lib/axios';
+
+export const ordersApi = {
+  /**
+   * Place a new order
+   * @param {Object} data - { combinationId, quantity }
+   */
+  placeOrder: async (data) => {
+    const response = await axios.post('/orders', data);
+    return response.data;
+  },
+
+  /**
+   * Get user's order history
+   */
+  getMyOrders: async () => {
+    const response = await axios.get('/orders/my-orders');
+    return response.data;
+  },
+
+  /**
+   * Get order details
+   */
+  getOrderDetails: async (id) => {
+    const response = await axios.get(`/orders/${id}`);
+    return response.data;
+  }
+};

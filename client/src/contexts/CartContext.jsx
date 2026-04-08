@@ -90,35 +90,8 @@ const cartReducer = (state, action) => {
   }
 };
 
-// LocalStorage helpers
-const loadCartFromStorage = () => {
-  try {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveCartToStorage = (items) => {
-  try {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    // ignore
-  }
-};
-
-
-
 export const CartProvider = ({ children }) => {
-  // Lazy init reducer from storage (no extra render)
-  const [state, dispatch] = useReducer(cartReducer, initialState, (init) => ({
-    ...init,
-    items: loadCartFromStorage(),
-  }));
-
-  // Save cart to localStorage
-  useMemo(() => saveCartToStorage(state.items), [state.items]);
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
   // Actions
   const addItem = useCallback((item) => dispatch({ type: CART_ACTIONS.ADD, payload: item }), []);
