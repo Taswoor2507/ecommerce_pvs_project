@@ -71,7 +71,8 @@ const deleteVariantType = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     data: {
-      message: `Variant type ${name} removed`,
+      name,
+      message: `Variant type "${name}" removed`,
       combinations_deactivated: deactivated,
       new_combinations_generated: newCombinationsGenerated,
     },
@@ -88,7 +89,8 @@ const deleteOption = asyncHandler(async (req, res) => {
   res.json({
     status: "success",
     data: {
-      message: `Option ${value} removed`,
+      value,
+      message: `Option "${value}" removed`,
       combinations_deactivated: deactivated,
     },
   });

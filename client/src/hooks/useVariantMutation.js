@@ -63,7 +63,8 @@ export const useVariantMutation = (productId) => {
     mutationFn: (variantTypeId) => 
       variantsApi.deleteVariantType(productId, variantTypeId),
     onSuccess: (data) => {
-      toast.success(`Variant type "${data.data.name}" removed successfully!`);
+      const variantName = data.data?.name || data.data?.variant_type?.name || 'Unknown';
+      toast.success(`Variant type "${variantName}" removed successfully!`);
       setServerError(null);
       
       // Invalidate related queries
@@ -83,7 +84,7 @@ export const useVariantMutation = (productId) => {
   const deleteOptionMutation = useMutation({
     mutationFn: (optionId) => variantsApi.deleteOption(optionId),
     onSuccess: (data) => {
-      const optionValue = data.data?.value || data.data?.option?.value || 'Unknown';
+      const optionValue = data.data?.value || data.data?.option?.value || data.data?.optionValue || 'Unknown';
       toast.success(`Option "${optionValue}" removed successfully!`);
       setServerError(null);
       
