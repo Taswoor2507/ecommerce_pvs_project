@@ -1,6 +1,6 @@
 import { CONSTANTS } from "../../config/constants.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { loginUserService, registerUserService , refreshTokenService } from "./auth.service.js";
+import { loginUserService, registerUserService, refreshTokenService, logoutUserService, getMeService } from "./auth.service.js";
 
 const register = asyncHandler(async(req,res , next)=>{
     const user = await registerUserService(req.body);
@@ -56,4 +56,35 @@ const register = asyncHandler(async(req,res , next)=>{
 });
 
 
-export {register ,  login , refreshToken};
+// Logout controller
+const logout = asyncHandler(async (req, res) => {
+    // Also remove from DB
+    await logoutUserService(req.user._id);
+
+    // Clear cookie
+    res.cookie("refreshToken", "none", {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true,
+        secure: CONSTANTS.NODE_ENV === "production",
+        sameSite: "strict"
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+        data: {}
+    });
+});
+
+// Get current user controller
+const getMe = asyncHandler(async (req, res) => {
+    const user = await getMeService(req.user._id);
+    
+    res.status(200).json({
+        success: true,
+        message: "User profile fetched successfully",
+        data: user
+    });
+});
+
+export {register, login, refreshToken, logout, getMe};

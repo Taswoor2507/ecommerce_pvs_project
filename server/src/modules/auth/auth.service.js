@@ -104,4 +104,27 @@ const registerUserService =  async (payload)=>{
 
 
 
-export {registerUserService , loginUserService, refreshTokenService};
+// Logout user
+const logoutUserService = async (userId) => {
+    const user = await User.findById(userId).select("+refreshToken");
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    
+    // Clear refresh token in DB
+    user.refreshToken = null;
+    await user.save({ validateBeforeSave: false });
+    
+    return true;
+};
+
+// Get current user profile
+const getMeService = async (userId) => {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    return user;
+};
+
+export {registerUserService , loginUserService, refreshTokenService, logoutUserService, getMeService};
