@@ -207,7 +207,7 @@ You should see `{ ok: 1 }`. Your replica set is now ready.
 
 You can find the database schema here:
 
-[View ERD Diagram](./docs/erd.pdf)
+[View ERD Diagram](https://drive.google.com/file/d/1pxjj0jazGI3NHj-2jlKPDMy-etoo9RhS/view?usp=sharing)
 
 
 
