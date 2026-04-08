@@ -14,16 +14,16 @@ async function startServer() {
   try {
     if (redis) {
       await redis.ping();
-      console.log(':white_check_mark: Redis connected');
+      console.log(': Redis connected');
     } else {
-      console.warn(':warning: Redis is disabled');
+      console.warn(': Redis is disabled');
     }
   } catch (err) {
-    console.warn(':warning:  Redis unavailable — caching and locking disabled:', err.message);
+    console.warn(':  Redis unavailable — caching and locking disabled:', err.message);
   }
 
   const server = app.listen(PORT, () => {
-    console.log(`:rocket: Server running on http://localhost:${PORT} [${process.env.NODE_ENV}]`);
+    console.log(`: Server running on http://localhost:${PORT} [${process.env.NODE_ENV}]`);
   });
 
   // Graceful shutdown: close HTTP server then DB/Redis connections
@@ -35,7 +35,7 @@ async function startServer() {
 
       try {
         await mongoose.connection.close();
-        console.log(':white_check_mark: MongoDB disconnected!');
+        console.log(': MongoDB disconnected!');
       } catch (err) {
         console.error(':x: Error closing MongoDB:', err.message);
       }
@@ -43,13 +43,13 @@ async function startServer() {
       try {
         if (redis) {
           await redis.quit();
-          console.log(':white_check_mark: Redis disconnected!');
+          console.log(': Redis disconnected!');
         }
       } catch (err) {
         console.error(':x: Error closing Redis:', err.message);
       }
 
-      console.log(':white_check_mark: Connections closed. Goodbye.');
+      console.log(' Connections closed. Goodbye.');
       process.exit(0);
     });
   };
