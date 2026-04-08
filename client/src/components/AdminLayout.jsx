@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Menu, 
   X, 
@@ -7,8 +7,11 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
-  Plus
+  Plus,
+  LogOut,
+  ChevronLeft
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,6 +19,7 @@ const AdminLayout = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   // Navigation items configuration
   const navigationItems = [
@@ -202,9 +206,16 @@ const AdminLayout = () => {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-200/60 bg-white/50">
-          <div className="text-center text-sm text-slate-500">
-            Product Management System
+        <div className="p-4 border-t border-slate-200/60 bg-white/50 space-y-3">
+          <Link 
+            to="/"
+            className="flex items-center space-x-2 text-sm text-slate-600 hover:text-indigo-600 transition-colors px-2"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Back to Website</span>
+          </Link>
+          <div className="text-center text-[10px] uppercase tracking-wider font-bold text-slate-400">
+            v1.2.0 Management System
           </div>
         </div>
       </aside>
@@ -233,17 +244,29 @@ const AdminLayout = () => {
               </nav>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               {/* User Profile */}
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">A</span>
+                <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-md shadow-indigo-200 border-2 border-white">
+                  <span className="text-white text-sm font-bold">
+                    {user?.name?.charAt(0).toUpperCase() || 'A'}
+                  </span>
                 </div>
-                <div className="hidden md:block">
-                  <p className="text-sm font-semibold text-slate-900">Admin User</p>
-                  <p className="text-xs text-slate-500">admin@example.com</p>
+                <div className="hidden lg:block text-right">
+                  <p className="text-sm font-bold text-slate-900 leading-none mb-1">{user?.name || 'Admin'}</p>
+                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter">{user?.role || 'Administrator'}</p>
                 </div>
               </div>
+
+              <div className="h-6 w-px bg-slate-200" />
+
+              <button
+                onClick={logout}
+                className="flex items-center space-x-2 p-2 px-3 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group font-medium text-sm"
+              >
+                <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </header>

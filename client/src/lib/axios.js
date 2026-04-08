@@ -94,6 +94,16 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // ─────────────────────────────────────────
+    // SECURITY BYPASS: DO NOT REFRESH ON LOGIN/REGISTER
+    // ─────────────────────────────────────────
+    const isLoginOrRegister = originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/register");
+
+    if (isLoginOrRegister) {
+      return Promise.reject(error);
+    }
+
     // Avoid infinite loop
     originalRequest._retryCount = originalRequest._retryCount || 0;
     if (originalRequest._retryCount >= 2) {
@@ -122,7 +132,7 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         })
-        .catch((err) => Promise.reject(err));
+        .catch(() => Promise.reject(error)); // Return original error if queued refresh fails
     }
 
     // ─────────────────────────────────────────
@@ -132,9 +142,9 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { data } = await refreshClient.post("/auth//refresh-token");
+      const { data } = await refreshClient.post("/auth/refresh-token");
 
-      const newToken = data?.accessToken;
+      const newToken = data?.data?.accessToken; // The server returns { success, data: { accessToken } }
 
       //  Safety check
       if (!newToken) {
@@ -152,14 +162,19 @@ api.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
       return api(originalRequest);
     } catch (refreshError) {
-      console.error("Refresh failed:", refreshError);
-
       processQueue(refreshError, null);
-
       authStore.clearToken();
-      broadcastLogout();
 
-      return Promise.reject(refreshError);
+      // If the original request was /auth/me, don't broadcast logout
+      // as it's just the initial check failing.
+      if (!originalRequest.url?.includes("/auth/me")) {
+        broadcastLogout();
+      }
+
+      // ─────────────────────────────────────────
+      // CRITICAL: Return ORIGINAL ERROR on failure
+      // ─────────────────────────────────────────
+      return Promise.reject(error);
     } finally {
       isRefreshing = false;
     }

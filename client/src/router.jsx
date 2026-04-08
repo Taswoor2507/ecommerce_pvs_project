@@ -7,38 +7,52 @@ import AdminLayout from "./components/AdminLayout";
 import AdminProductsPage from "./pages/AdminProductsPage";
 import AdminProductViewPage from "./pages/AdminProductViewPage";
 import AdminProductEditPage from "./pages/AdminProductEditPage";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import AuthPage from "./pages/AuthPage";
 
 // Router
 export const router = createBrowserRouter([
-  // Admin Routes
+  // Auth Routes
+  {
+    path: "/login",
+    element: <AuthPage />,
+  },
+  
+  // Admin Routes (Protected)
   {
     path: "/admin",
-    element: <AdminLayout />,
+    element: <ProtectedRoute adminOnly={true} />,
     children: [
       {
-        index: true,
-        element: <AdminProductsPage />,
-      },
-      {
-        path: "products",
-        element: <AdminProductsPage />,
-      },
-      {
-        path: "products/create",
-        element: <CreateProductPage />,
-      },
-      {
-        path: "products/:id",
-        element: <AdminProductViewPage />,
-      },
-      {
-        path: "products/:id/edit",
-        element: <AdminProductEditPage />,
-      },
+        path: "",
+        element: <AdminLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminProductsPage />,
+          },
+          {
+            path: "products",
+            element: <AdminProductsPage />,
+          },
+          {
+            path: "products/create",
+            element: <CreateProductPage />,
+          },
+          {
+            path: "products/:id",
+            element: <AdminProductViewPage />,
+          },
+          {
+            path: "products/:id/edit",
+            element: <AdminProductEditPage />,
+          },
+        ]
+      }
     ],
   },
 
-  // Customer Routes
+  // Customer Routes (Public)
   {
     path: "/",
     element: <MainLayout />, 
