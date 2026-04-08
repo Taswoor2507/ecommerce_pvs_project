@@ -73,10 +73,10 @@ const AdminProductsPage = () => {
       ),
     },
     {
-      key: 'sku',
-      title: 'SKU',
+      key: 'variant_type_count',
+      title: 'Variants',
       render: (val) => (
-        <span className="text-sm text-slate-600">{val || '—'}</span>
+        <span className="text-sm text-slate-600">{val || 0} Types</span>
       ),
     },
     {

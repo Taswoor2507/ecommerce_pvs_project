@@ -174,7 +174,7 @@ const AdminProductViewPage = () => {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
           label="Status"
           icon={Package}
@@ -201,21 +201,7 @@ const AdminProductViewPage = () => {
           iconBg="bg-purple-100"
           iconColor="text-purple-600"
         >
-          <StatusBadge type="stock" value={product.total_stock || product.stock || 0} />
-        </StatCard>
-
-        <StatCard
-          label="Rating"
-          icon={Star}
-          iconBg="bg-amber-100"
-          iconColor="text-amber-600"
-        >
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 text-amber-400 fill-current" />
-            <span className="text-lg font-semibold text-slate-900">
-              {product.rating || '0.0'}
-            </span>
-          </div>
+          <StatusBadge type="stock" value={product.stock || 0} />
         </StatCard>
       </div>
 
@@ -229,15 +215,12 @@ const AdminProductViewPage = () => {
                 <CardTitle>Product Information</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                   <InfoField label="Name" value={product.name} />
-                  <InfoField label="SKU" value={product.sku || 'N/A'} />
-                  <InfoField
-                    label="Category"
-                    value={product.category || 'Uncategorized'}
-                  />
                   <InfoField
                     label="Base Price"
                     value={`$${product.base_price || '0.00'}`}
                   />
+                  <InfoField label="Created On" value={new Date(product.createdAt).toLocaleDateString()} />
+                  <InfoField label="Last Updated" value={new Date(product.updatedAt).toLocaleDateString()} />
                 </div>
               </div>
 
