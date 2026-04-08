@@ -208,8 +208,12 @@ const ProductDetailPage = () => {
             <ProductInfo
               basePrice={productBasePrice}
               finalPrice={combinationInfo.finalPrice}
+              additionalPrice={combinationInfo.additionalPrice}
               stock={hasVariants ? combinationInfo.stock : product.stock}
               inStock={hasVariants ? combinationInfo.inStock : product.stock > 0}
+              hasVariants={hasVariants}
+              isAllVariantsSelected={isAllVariantsSelected}
+              isLoadingCombination={lookupCombinationState.isPending}
               onAddToCart={handleAddToCart}
             />
 

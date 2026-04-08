@@ -3,8 +3,10 @@ import { Combination, Product, Order } from "../../models/index.js";
 import { ApiError } from "../../utils/apiError.js";
 import { invalidateProductCache } from "../../utils/cache.js";
 import { syncProductStockFromCombinations } from "../../utils/stock.utils.js";
+import ApiFeatures from "../../utils/ApiFeatures.js";
 
 async function placeOrderService(combinationId, quantity, userId) {
+// ... existing placeOrderService content (I'll keep it correct)
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -109,12 +111,52 @@ async function placeOrderService(combinationId, quantity, userId) {
     };
 
   } catch (err) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     throw err; 
   } finally {
     session.endSession();
   }
-};
+}
 
+async function getAllOrdersService(queryParams) {
+  const baseQuery = Order.find().populate('user_id', 'name email');
+  const countQuery = Order.find();
 
-export {placeOrderService}
+  const countFeatures = new ApiFeatures(countQuery, queryParams)
+    .filter(['status', 'user_id']);
+
+  const features = new ApiFeatures(baseQuery, queryParams)
+    .filter(['status', 'user_id'])
+    .paginate(20, 100)
+    .sort("-createdAt", ["createdAt", "updatedAt", "total_price", "status"]);
+
+  const orders = await features.query.lean();
+  const total = await countFeatures.query.countDocuments();
+
+  return {
+    orders,
+    pagination: {
+      total,
+      page: features.pagination.page,
+      limit: features.pagination.limit,
+      pages: Math.ceil(total / features.pagination.limit),
+    },
+  };
+}
+
+async function getOrderDetailsService(orderId) {
+  const order = await Order.findById(orderId)
+    .populate('user_id', 'name email createdAt')
+    .populate('product_id', 'image')
+    .lean();
+    
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  return order;
+}
+
+export { placeOrderService, getAllOrdersService, getOrderDetailsService };

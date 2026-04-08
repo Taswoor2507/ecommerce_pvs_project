@@ -45,7 +45,7 @@ class ApiFeatures {
     // Only allow filtering on whitelisted fields
     allowedFields.forEach(field => {
       // Check for direct field value
-      if (this.queryString[field] !== undefined) {
+      if (this.queryString[field] !== undefined && this.queryString[field] !== '') {
         const value = this.queryString[field];
         
         // Skip potentially dangerous values

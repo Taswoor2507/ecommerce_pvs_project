@@ -24,5 +24,13 @@ export const ordersApi = {
   getOrderDetails: async (id) => {
     const response = await axios.get(`/orders/${id}`);
     return response.data;
+  },
+
+  /**
+   * Admin: Get all orders (paginated)
+   */
+  getAdminOrders: async (params) => {
+    const response = await axios.get('/orders', { params });
+    return response.data;
   }
 };

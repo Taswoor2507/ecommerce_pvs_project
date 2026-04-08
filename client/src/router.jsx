@@ -11,6 +11,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import AuthPage from "./pages/AuthPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
+import AdminOrdersPage from "./pages/AdminOrdersPage";
 
 // Router
 export const router = createBrowserRouter([
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
           {
             path: "products/:id/edit",
             element: <AdminProductEditPage />,
+          },
+          {
+            path: "orders",
+            element: <AdminOrdersPage />,
           },
         ]
       }

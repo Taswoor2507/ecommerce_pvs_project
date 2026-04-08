@@ -9,7 +9,8 @@ import {
   Search,
   Plus,
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -32,6 +33,12 @@ const AdminLayout = () => {
         { title: 'All Products', path: '/admin/products' },
         { title: 'Create Product', path: '/admin/products/create' }
       ]
+    },
+    {
+      title: 'Orders',
+      icon: ShoppingBag,
+      path: '/admin/orders',
+      badge: null,
     }
   ];
 
@@ -238,8 +245,7 @@ const AdminLayout = () => {
                 <span>Admin</span>
                 <span>/</span>
                 <span className="text-slate-900 font-medium">
-                  {location.pathname.startsWith('/admin/products') && 'Products'}
-                  {!location.pathname.startsWith('/admin/products') && 'Products'}
+                  {location.pathname.includes('/admin/orders') ? 'Orders' : 'Products'}
                 </span>
               </nav>
             </div>
