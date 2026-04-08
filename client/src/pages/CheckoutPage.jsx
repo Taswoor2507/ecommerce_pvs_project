@@ -12,11 +12,12 @@ import Button from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import PageHeader from '../components/ui/PageHeader';
 import { ShoppingBag, Truck, CreditCard, ShieldCheck } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const { items, subtotal, totalQuantity } = useCart();
+  const { items, subtotal, totalQuantity, clearCart } = useCart();
   const { placeOrder, isLoading } = useOrderMutation();
 
   const methods = useForm({
@@ -42,25 +43,38 @@ const CheckoutPage = () => {
     }
   }, [isAuthenticated, items.length, navigate]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData) => {
     try {
-      // Place orders for all items in the cart
-      // The backend currently supports one item per POST /orders call
-      // In a real production app, we'd have a bulk order endpoint or loop correctly.
-      // Based on provided API: POST /api/orders { combination_id, quantity }
-      
-      // For this implementation, we will place the first item or handle bulk if server supports it.
-      // Given the requirement "Integrate order API POST /api/orders { combination_id, quantity }":
-      // We'll process the items sequentially or pick the most important one.
-      // Usually, a production app handles the whole cart. 
-      // I'll implement a loop to process all items.
-      
-      for (const item of items) {
-        await placeOrder({
+      // Prepare order data with all cart items
+      const orderData = {
+        items: items.map(item => ({
+          productId: item.productId,
           combinationId: item.combinationId,
-          quantity: item.quantity
-        });
-      }
+          quantity: item.quantity,
+          price: item.price,
+          name: item.name,
+          image: item.image,
+          variants: item.variants || []
+        })),
+        shippingInfo: {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode
+        }
+      };
+      
+            
+      // Place single order with all items
+      await placeOrder(orderData);
+      
+      // Clear cart after successful order
+      clearCart();
+      
+      // Show success message
+      toast.success('Order placed successfully!');
       
       navigate('/order-success');
     } catch {

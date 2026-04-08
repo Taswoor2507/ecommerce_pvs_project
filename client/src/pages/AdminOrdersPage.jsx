@@ -53,21 +53,33 @@ const AdminOrdersPage = () => {
     {
       key: 'order_id',
       title: 'Order Details',
-      render: (_, row) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-            <ShoppingBag className="w-5 h-5 text-indigo-600" />
+      render: (_, row) => {
+        // Get first item name for display, or show count
+        const firstItem = row.items?.[0];
+        const displayName = firstItem?.product_snapshot?.name || 'Unknown Product';
+        const itemCount = row.items?.length || 0;
+        
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ShoppingBag className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">
+                {displayName}
+                {itemCount > 1 && (
+                  <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded">
+                    +{itemCount - 1} more
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-slate-400 truncate">
+                ID: {row._id}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900 truncate">
-              {row.product_snapshot?.name || 'Unknown Product'}
-            </p>
-            <p className="text-xs text-slate-400 truncate">
-              ID: {row._id}
-            </p>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'user',
@@ -96,11 +108,11 @@ const AdminOrdersPage = () => {
       ),
     },
     {
-      key: 'total_price',
+      key: 'total_amount',
       title: 'Total',
       render: (val) => (
         <span className="text-sm font-bold text-slate-900">
-          ${val.toFixed(2)}
+          ${val ? val.toFixed(2) : '0.00'}
         </span>
       ),
     },
@@ -148,7 +160,7 @@ const AdminOrdersPage = () => {
         />
         <StatCard 
           label="Total Revenue" 
-          value={`$${orders.reduce((sum, o) => sum + o.total_price, 0).toFixed(2)}`} 
+          value={`$${orders.reduce((sum, o) => sum + (o.total_amount || 0), 0).toFixed(2)}`} 
           icon={DollarSign}
           color="emerald"
         />

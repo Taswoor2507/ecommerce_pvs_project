@@ -3,7 +3,7 @@ import axios from '../lib/axios';
 export const ordersApi = {
   /**
    * Place a new order
-   * @param {Object} data - { combinationId, quantity }
+   * @param {Object} data - { items: [{ combinationId, productId, quantity, price, name, image, variants }], shippingInfo }
    */
   placeOrder: async (data) => {
     const response = await axios.post('/orders', data);

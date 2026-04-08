@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useMemo } from 'react';
+import { useReducer, useCallback, useEffect, useMemo } from 'react';
 import { CartStateContext, CartActionsContext } from './cart.context';
 
 // Action constants
@@ -91,7 +91,38 @@ const cartReducer = (state, action) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  // Load cart from localStorage on initial render
+  const loadCartFromStorage = () => {
+    try {
+      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+      if (!savedCart) return initialState;
+      
+      const parsedCart = JSON.parse(savedCart);
+      
+      // Ensure the parsed cart has the correct structure
+      return {
+        items: Array.isArray(parsedCart.items) ? parsedCart.items : [],
+        isOpen: Boolean(parsedCart.isOpen),
+      };
+    } catch (error) {
+      console.error('Failed to load cart from localStorage:', error);
+      return initialState;
+    }
+  };
+
+  const [state, dispatch] = useReducer(cartReducer, loadCartFromStorage());
+
+  // Save cart to localStorage whenever state changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({
+        items: state.items,
+        isOpen: state.isOpen,
+      }));
+    } catch (error) {
+      console.error('Failed to save cart to localStorage:', error);
+    }
+  }, [state]);
 
   // Actions
   const addItem = useCallback((item) => dispatch({ type: CART_ACTIONS.ADD, payload: item }), []);
@@ -109,18 +140,19 @@ export const CartProvider = ({ children }) => {
 
   // Totals (memoized)
   const totals = useMemo(() => {
+    const items = Array.isArray(state.items) ? state.items : [];
     return {
-      uniqueItemsCount: state.items.length,
-      totalQuantity: state.items.reduce((sum, item) => sum + item.quantity, 0),
-      subtotal: state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      uniqueItemsCount: items.length,
+      totalQuantity: items.reduce((sum, item) => sum + (item.quantity || 0), 0),
+      subtotal: items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0),
     };
   }, [state.items]);
 
   return (
     <CartStateContext.Provider
       value={{
-        items: state.items,
-        isOpen: state.isOpen,
+        items: Array.isArray(state.items) ? state.items : [],
+        isOpen: Boolean(state.isOpen),
         totalCount: totals.uniqueItemsCount,
         totalQuantity: totals.totalQuantity,
         subtotal: totals.subtotal,

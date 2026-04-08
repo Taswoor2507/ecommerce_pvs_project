@@ -7,7 +7,7 @@ export const useCartActions = () => {
   const addToCart = useCallback((product, combination, quantity = 1) => {
     const cartItem = {
       productId: product._id,
-      combinationId: combination?._id || null,
+      combinationId: combination?._id || undefined, // Use undefined instead of null for simple products
       name: product.name,
       image: product.image || 'https://www.inkfactory.pk/wp-content/uploads/2019/08/T-Shirt-Mockup-007.jpg',
       price: combination?.final_price || product.base_price,

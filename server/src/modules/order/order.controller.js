@@ -2,10 +2,10 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import { placeOrderService, getAllOrdersService, getOrderDetailsService } from "./order.service.js";
 
 export const placeOrder = asyncHandler(async (req, res) => {
-  const { combinationId, quantity } = req.body;
+  const { items, shippingInfo } = req.body;
   const userId = req.user.id;
 
-  const data = await placeOrderService(combinationId, quantity, userId);
+  const data = await placeOrderService({ items, shippingInfo }, userId);
 
   res.status(201).json({
     success: true,

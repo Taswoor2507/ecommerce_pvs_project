@@ -77,9 +77,10 @@ const OrderDetailsModal = ({ isOpen, onClose, orderId }) => {
                     Customer Information
                   </h3>
                   <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-                    <InfoRow label="Name" value={order.user_id?.name} />
-                    <InfoRow label="Email" value={order.user_id?.email} />
-                    <InfoRow label="Joined" value={new Date(order.user_id?.createdAt).toLocaleDateString()} />
+                    <InfoRow label="Name" value={order.shipping_info?.fullName} />
+                    <InfoRow label="Email" value={order.shipping_info?.email} />
+                    <InfoRow label="Phone" value={order.shipping_info?.phone} />
+                    <InfoRow label="Address" value={`${order.shipping_info?.address}, ${order.shipping_info?.city}`} />
                   </div>
                 </section>
 
@@ -91,7 +92,7 @@ const OrderDetailsModal = ({ isOpen, onClose, orderId }) => {
                   </h3>
                   <div className="bg-slate-50 rounded-xl p-4 space-y-3">
                     <InfoRow label="Placed On" value={new Date(order.createdAt).toLocaleString()} />
-                    <InfoRow label="Quantity" value={order.quantity} />
+                    <InfoRow label="Total Items" value={order.items?.length || 0} />
                     <InfoRow 
                       label="Payment Method" 
                       value={<span className="text-emerald-600 font-medium">Cash on Delivery</span>} 
@@ -104,51 +105,63 @@ const OrderDetailsModal = ({ isOpen, onClose, orderId }) => {
               <section className="space-y-4">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <Package className="w-4 h-4 text-slate-400" />
-                  Item Details
+                  Item Details ({order.items?.length || 0} items)
                 </h3>
-                <div className="border border-slate-100 rounded-2xl overflow-hidden">
-                  <div className="p-4 bg-slate-50/50 flex items-center gap-4">
-                    <div className="w-16 h-16 bg-white rounded-xl border border-slate-200 overflow-hidden flex-shrink-0">
-                      <img 
-                        src={order.product_id?.image || 'https://via.placeholder.com/150'} 
-                        alt={order.product_snapshot?.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-slate-900">{order.product_snapshot?.name}</p>
-                      <div className="mt-1 flex flex-wrap gap-1.5">
-                        {order.combination_snapshot?.option_labels?.map((label, idx) => (
-                          <span key={idx} className="text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600 uppercase">
-                            {label.type}: {label.value}
-                          </span>
-                        ))}
+                <div className="space-y-3">
+                  {order.items?.map((item, index) => (
+                    <div key={index} className="border border-slate-100 rounded-2xl overflow-hidden">
+                      <div className="p-4 bg-slate-50/50 flex items-center gap-4">
+                        <div className="w-16 h-16 bg-white rounded-xl border border-slate-200 overflow-hidden flex-shrink-0">
+                          <img 
+                            src={item.product_snapshot?.image || item.product_id?.image || 'https://via.placeholder.com/150'} 
+                            alt={item.product_snapshot?.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-900">{item.product_snapshot?.name}</p>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {item.combination_snapshot?.option_labels?.map((label, idx) => (
+                              <span key={idx} className="text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-600 uppercase">
+                                {label.type}: {label.value}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 border-t border-slate-100 bg-white space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-500 font-medium">Base Price</span>
+                          <span className="font-semibold text-slate-900">${item.product_snapshot?.base_price?.toFixed(2)}</span>
+                        </div>
+                        {item.combination_snapshot?.additional_price > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-slate-500 font-medium">Variant Additional</span>
+                            <span className="font-semibold text-indigo-600">+${item.combination_snapshot.additional_price.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm pt-2 border-t border-slate-50 border-dashed">
+                          <span className="text-slate-500 font-medium">Unit Price</span>
+                          <span className="font-bold text-slate-900">${item.unit_price?.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-500 font-medium">Quantity</span>
+                          <span className="font-bold text-slate-900">x {item.quantity}</span>
+                        </div>
+                        <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-lg">
+                          <span className="font-black text-slate-900">Item Total</span>
+                          <span className="font-black text-indigo-600">${item.total_price?.toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                   
-                  <div className="p-4 border-t border-slate-100 bg-white space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-500 font-medium">Base Price</span>
-                      <span className="font-semibold text-slate-900">${order.product_snapshot?.base_price?.toFixed(2)}</span>
-                    </div>
-                    {order.combination_snapshot?.additional_price > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-500 font-medium">Variant Additional</span>
-                        <span className="font-semibold text-indigo-600">+${order.combination_snapshot.additional_price.toFixed(2)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-sm pt-2 border-t border-slate-50 border-dashed">
-                      <span className="text-slate-500 font-medium">Unit Price</span>
-                      <span className="font-bold text-slate-900">${order.unit_price.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-500 font-medium">Quantity</span>
-                      <span className="font-bold text-slate-900">x {order.quantity}</span>
-                    </div>
-                    <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-lg">
-                      <span className="font-black text-slate-900">Total Amount</span>
-                      <span className="font-black text-indigo-600">${order.total_price.toFixed(2)}</span>
+                  {/* Order Total */}
+                  <div className="border-2 border-indigo-200 rounded-2xl p-4 bg-indigo-50/30">
+                    <div className="flex justify-between items-center text-xl">
+                      <span className="font-black text-slate-900">Order Total</span>
+                      <span className="font-black text-indigo-600">${order.total_amount?.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

@@ -1,56 +1,79 @@
 import mongoose from "mongoose";
 const OrderSchema = new mongoose.Schema(
   {
-    combination_id: {
-      type:     mongoose.Schema.Types.ObjectId,
-      ref:      'Combination',
-      required: true,
-    },
     user_id: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'User',
       required: true,
     },
-    // Denormalized for fast order history display (avoid joining back to Combination)
-    product_id: {
-      type:     mongoose.Schema.Types.ObjectId,
-      ref:      'Product',
-      required: true,
-    },
-    quantity: {
-      type:     Number,
-      required: true,
-      min:      [1,   'Quantity must be at least 1'],
-      max:      [100, 'Quantity cannot exceed 100 per order'],
-      validate: {
-        validator: Number.isInteger,
-        message:   'Quantity must be an integer',
+
+    // ── Order Items Array ──────────────────────────────────────────────────
+    items: [{
+      product_id: {
+        type:     mongoose.Schema.Types.ObjectId,
+        ref:      'Product',
+        required: true,
       },
-    },
+      combination_id: {
+        type:     mongoose.Schema.Types.ObjectId,
+        ref:      'Combination',
+        required: false, // Optional for simple products
+      },
+      quantity: {
+        type:     Number,
+        required: true,
+        min:      [1,   'Quantity must be at least 1'],
+        max:      [100, 'Quantity cannot exceed 100 per item'],
+        validate: {
+          validator: Number.isInteger,
+          message:   'Quantity must be an integer',
+        },
+      },
+      unit_price: {
+        type:     Number,
+        required: true,
+        // = product.base_price + combination.additional_price at time of order
+      },
+      total_price: {
+        type:     Number,
+        required: true,
+        // = unit_price * quantity at time of order
+      },
+      
+      // ── Product snapshot (display without joining) ──────────────────────
+      product_snapshot: {
+        name:       { type: String, required: true },
+        base_price: { type: Number, required: true },
+        image:      { type: String },
+      },
 
-    // ── Price snapshot — NEVER recalculate from live data ──────────────────
-    unit_price: {
+      // ── Combination snapshot (display without joining) ──────────────────
+      combination_snapshot: {
+        option_labels:    [{ type: String, value: String }],
+        additional_price: { type: Number, default: 0 },
+      },
+    }],
+
+    // ── Order Totals ───────────────────────────────────────────────────────
+    subtotal: {
       type:     Number,
       required: true,
-      // = product.base_price + combination.additional_price at time of order
+      min:      [0, 'Subtotal cannot be negative'],
     },
-    total_price: {
+    total_amount: {
       type:     Number,
       required: true,
-      // = unit_price * quantity at time of order
+      min:      [0, 'Total amount cannot be negative'],
     },
 
-    // ── Product snapshot (display without joining) ──────────────────────────
-    product_snapshot: {
-      name:       { type: String },
-      base_price: { type: Number },
-    },
-
-    // ── Combination snapshot (display without joining) ──────────────────────
-    combination_snapshot: {
-      // [ { type: "Size", value: "M" }, { type: "Color", value: "Blue" } ]
-      option_labels:    [{ type: String, value: String }],
-      additional_price: { type: Number },
+    // ── Shipping Information ───────────────────────────────────────────────
+    shipping_info: {
+      fullName:   { type: String, required: true },
+      email:      { type: String, required: true },
+      phone:      { type: String, required: true },
+      address:    { type: String, required: true },
+      city:       { type: String, required: true },
+      postalCode: { type: String, required: true },
     },
 
     status: {
@@ -62,14 +85,20 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Fast lookup: orders for a specific combination (used in delete guards)
-OrderSchema.index({ combination_id: 1 });
+// Fast lookup: orders for a specific user
+OrderSchema.index({ user_id: -1 });
 
-// Fast lookup: orders for a product (order history)
-OrderSchema.index({ product_id: 1 });
+// Fast lookup: orders containing specific products
+OrderSchema.index({ 'items.product_id': 1 });
+
+// Fast lookup: orders containing specific combinations
+OrderSchema.index({ 'items.combination_id': 1 });
 
 // Recent orders first
 OrderSchema.index({ createdAt: -1 });
+
+// Status-based queries
+OrderSchema.index({ status: 1 });
 
 const Order = mongoose.model('Order', OrderSchema);
 export default Order;

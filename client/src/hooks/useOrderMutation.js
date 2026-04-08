@@ -6,13 +6,11 @@ import { extractErrorMessage } from '../utils/errorExtractor';
 
 export const useOrderMutation = () => {
   const queryClient = useQueryClient();
-  const { clearCart } = useCart();
 
   const placeOrderMutation = useMutation({
     mutationFn: ordersApi.placeOrder,
     onSuccess: (data) => {
-      toast.success('Order placed successfully!');
-      clearCart();
+      // Don't clear cart here - let checkout handle it after all orders
       // Invalidate products to refresh stock levels
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product'] });
