@@ -125,10 +125,15 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
         updateCombination({
           combinationId,
           payload: { [field]: value },
+          skipToast: true,
         })
       );
 
       await Promise.all(updatePromises);
+      
+      import('react-hot-toast').then(({ default: toast }) => {
+        toast.success(`${selectedCombinations.size} combinations updated successfully!`);
+      });
 
       // Clear selections and input
       setSelectedCombinations(new Set());

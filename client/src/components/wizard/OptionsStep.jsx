@@ -231,7 +231,7 @@ const OptionsStep = ({ productId, variants, onVariantsChange }) => {
                           <button
                             onClick={() => handleDeleteOption(option._id || option.id, variant._id)}
                             disabled={isDeletingOption || variant.options.length <= 1}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600"
+                            className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600"
                             title={variant.options.length <= 1 ? "Cannot delete the last option" : "Delete option"}
                           >
                             <X className="w-3 h-3" />

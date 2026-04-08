@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { productsApi } from "../api/products.api";
 import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+
 import { Plus } from "lucide-react";
 
 import ProductsList from "../components/ProductsList";
@@ -17,7 +17,7 @@ import { useCallback, useMemo, useEffect, useState } from "react";
 
 const ProductListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+
   const location = useLocation();
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -174,13 +174,6 @@ const ProductListPage = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Products</h1>
             <p className="text-gray-600">Manage your product inventory</p>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => navigate('/products/create')}
-            leftIcon={<Plus className="w-4 h-4" />}
-          >
-            Create Product
-          </Button>
         </div>
 
         {/* 🔍 Search */}

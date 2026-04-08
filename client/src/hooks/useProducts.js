@@ -1,82 +1,70 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api/products.api';
+import toast from 'react-hot-toast';
 
 export const useProducts = (params = {}) => {
-  // Default pagination parameters
-  const defaultParams = {
+  const queryClient = useQueryClient();
+
+  const queryParams = {
     page: 1,
     limit: 10,
-    ...params
+    ...params,
   };
 
-  // ── Query: Products List
   const productsQuery = useQuery({
-    queryKey: ['products', defaultParams],
-    queryFn: () => productsApi.list(defaultParams),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    queryKey: ['products', queryParams],
+    queryFn: () => productsApi.list(queryParams),
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5,
     retry: (failureCount, error) => {
-      // Don't retry on 404 or 400 
       const status = error?.response?.status;
       if ([400, 404].includes(status)) return false;
       return failureCount < 2;
     },
     refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
   });
 
-  // ── Mutation: Delete Product
   const deleteMutation = useMutation({
     mutationFn: (id) => productsApi.remove(id),
     onSuccess: () => {
-      // Refetch products list after successful deletion
-      productsQuery.refetch();
+      toast.success('Product deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error) => {
+      const message =
+        error?.response?.data?.message || 'Failed to delete product';
+      toast.error(message);
     },
   });
 
-  // ── Derived State
-  const isLoading = productsQuery.isLoading;
-  const isError = productsQuery.isError;
-  const error = productsQuery.error;
-  const isFetching = productsQuery.isFetching;
-
-  // Extract data safely - handle different API response structures
   const rawData = productsQuery.data;
-  
-  // Handle paginated response structure
-  const products = Array.isArray(rawData?.data) ? rawData.data : 
-                   Array.isArray(rawData?.products) ? rawData.products :
-                   Array.isArray(rawData) ? rawData :
-                   [];
-                   
-  // Extract pagination info if available
-  const pagination = rawData?.pagination || rawData?.meta || {
-    page: defaultParams.page,
-    pages: 1,
-    total: products.length,
-    limit: defaultParams.limit
-  };
 
-  
+  const products = Array.isArray(rawData?.data)
+    ? rawData.data
+    : Array.isArray(rawData?.products)
+    ? rawData.products
+    : Array.isArray(rawData)
+    ? rawData
+    : [];
+
+  const pagination = rawData?.pagination ||
+    rawData?.meta || {
+      page: queryParams.page,
+      pages: 1,
+      total: products.length,
+      limit: queryParams.limit,
+    };
+
   return {
-    // Data
     products,
     pagination,
-    
-    // States
-    isLoading,
-    isError,
-    error,
-    isFetching,
-    
-    // Query state
-    productsQuery,
-    
-    // Actions
+    isLoading: productsQuery.isLoading,
+    isError: productsQuery.isError,
+    error: productsQuery.error,
+    isFetching: productsQuery.isFetching,
     deleteProduct: deleteMutation.mutateAsync,
-    deleteProductState: deleteMutation,
-    
-    // Refetch
-    refetchProducts: productsQuery.refetch,
+    isDeleting: deleteMutation.isPending,
   };
 };
 

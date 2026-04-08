@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { formatCurrency } from "../utils/format";
+import { formatCurrency } from "../utils/formatters";
 import { isProductInStock, getStockStatusText, getStockBadgeVariant } from "../utils/stock.utils";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";

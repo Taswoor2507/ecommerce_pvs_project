@@ -10,7 +10,7 @@ const VariantTypesStep = ({ productId, variants, basicProductData, onVariantsCha
   const [currentOption, setCurrentOption] = useState('');
   const [options, setOptions] = useState([]);
 
-  const hasStock = basicProductData?.stock && basicProductData.stock > 0;
+  const hasStock = (basicProductData?.stock || 0) > 0;
 
   const {
     addVariantType,

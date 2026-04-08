@@ -37,10 +37,9 @@ export function ProductForm({ data, onChange, variantMode = "create" }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Sync with external data changes (for edit mode)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (data) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: data.name || "",
         description: data.description || "",

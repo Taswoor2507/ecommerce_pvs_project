@@ -211,10 +211,10 @@ const ProductCreationWizard = ({ onProductCreated }) => {
   return (
     <div className="space-y-6">
       {/* Progress Steps */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg p-6">
-        <div className="flex items-center justify-center overflow-x-auto">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg p-6 overflow-hidden">
+        <div className="flex items-center overflow-x-auto pb-4 pt-1 snap-x [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-50">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center shrink-0">
+            <div key={step.id} className="flex items-center shrink-0 snap-start">
               <div className="flex items-center">
                 <div
                   className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-semibold transition-all duration-300 ${

@@ -4,7 +4,6 @@ import { createProductSchema } from '../../schemas/product.schema.js';
 import { useProductMutation } from '../../hooks/useProductMutation.js';
 import { FormField, FormError } from '../forms/index.js';
 import Button from '../ui/Button.jsx';
-import toast from 'react-hot-toast';
 
 /**
  * Step 1: Basic Product Information
@@ -40,16 +39,12 @@ const BasicProductInfoStep = ({ data, onDataChange, onNext }) => {
       const result = await createProduct(formData);
       onDataChange(result.data);
       
-      // Show success message
-      toast.success('Product created successfully!');
-      
-      // Wait a tick for state to update before calling onNext
+      // Try to proceed to next step immediately
       setTimeout(() => {
         onNext();
       }, 0);
     } catch {
       // Error handled by custom hook and displayed in UI
-      toast.error('Failed to create product. Please check the form and try again.');
     }
   };
 

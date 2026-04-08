@@ -115,8 +115,10 @@ export const useVariantMutation = (productId) => {
   const updateCombinationMutation = useMutation({
     mutationFn: ({ combinationId, payload }) => 
       combinationsApi.update(combinationId, payload),
-    onSuccess: (data) => {
-      toast.success('Combination updated successfully!');
+    onSuccess: (data, variables) => {
+      if (!variables?.skipToast) {
+        toast.success('Combination updated successfully!');
+      }
       setServerError(null);
       
       // Invalidate related queries
