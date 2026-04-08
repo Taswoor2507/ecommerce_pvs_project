@@ -259,34 +259,38 @@ const ProductCreationWizard = ({ onProductCreated }) => {
       </div>
 
       {/* Step Content */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg p-8">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg p-4 sm:p-8">
         {getCurrentStepComponent()}
       </div>
 
       {/* Navigation Footer - Only show for steps 2-4 */}
       {currentStep > 1 && (
-        <div className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-lg p-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <button
-              onClick={goToPreviousStep}
-              disabled={!canGoPrevious}
-              className="flex items-center space-x-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-            >
-              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
-              <span>Previous</span>
-            </button>
-            <div className="flex items-center space-x-3 px-4 py-2 bg-slate-100 rounded-xl">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-slate-700">
-                Step {currentStep} of {steps.length}
+        <div className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-lg p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            {currentStep > 2 ? (
+              <button
+                onClick={goToPreviousStep}
+                disabled={!canGoPrevious}
+                className="flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group text-sm sm:text-base"
+              >
+                <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
+                <span className="hidden xs:inline">Previous</span>
+              </button>
+            ) : <div className="hidden xs:block w-24"></div>}
+
+            <div className="flex items-center space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-100 rounded-xl flex-shrink-0">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] sm:text-sm font-medium text-slate-700 whitespace-nowrap uppercase tracking-wider">
+                Step {currentStep}/{steps.length}
               </span>
             </div>
+
             <button
               onClick={goToNextStep}
               disabled={!canGoNext}
-              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 group"
+              className="flex items-center space-x-2 px-4 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 group text-sm sm:text-base"
             >
-              <span>{currentStep === steps.length ? 'Complete' : 'Next'}</span>
+              <span className="whitespace-nowrap">{currentStep === steps.length ? 'Finish' : 'Next'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
             </button>
           </div>

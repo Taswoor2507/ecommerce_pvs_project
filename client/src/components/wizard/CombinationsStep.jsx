@@ -202,13 +202,13 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-0 sm:p-4">
       {/* Header */}
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
           Combinations Configuration
         </h3>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
           Set stock and additional pricing for each combination. The final price is base price + additional price.
         </p>
       </div>
@@ -221,62 +221,81 @@ const CombinationsStep = ({ productId, onCombinationsChange }) => {
       />
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="text-gray-600 mt-2">Loading combinations...</p>
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="text-slate-500 mt-4 font-medium">Loading combinations list...</p>
         </div>
       ) : (
         <>
           {/* Search and Bulk Actions */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="mb-8 space-y-4">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input
                 type="text"
-                placeholder="Search combinations..."
+                placeholder="Search combinations by option value..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               />
             </div>
 
             {selectedCombinations.size > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">
-                  {selectedCombinations.size} selected
-                </span>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Stock"
-                    value={bulkStock}
-                    onChange={(e) => setBulkStock(e.target.value)}
-                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkUpdate('stock')}
-                    disabled={!bulkStock || isUpdatingCombination}
-                  >
-                    Set Stock
-                  </Button>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Price"
-                    value={bulkPrice}
-                    onChange={(e) => setBulkPrice(e.target.value)}
-                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkUpdate('additional_price')}
-                    disabled={!bulkPrice || isUpdatingCombination}
-                  >
-                    Set Price
-                  </Button>
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-indigo-700 uppercase tracking-widest flex items-center gap-2">
+                      <Settings className="w-3.5 h-3.5" />
+                      {selectedCombinations.size} Combinations Selected
+                    </span>
+                    <button 
+                      onClick={() => setSelectedCombinations(new Set())}
+                      className="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Stock"
+                        value={bulkStock}
+                        onChange={(e) => setBulkStock(e.target.value)}
+                        className="flex-1 min-w-0 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="whitespace-nowrap font-bold"
+                        onClick={() => handleBulkUpdate('stock')}
+                        disabled={!bulkStock || isUpdatingCombination}
+                      >
+                        Set Stock
+                      </Button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Price"
+                        value={bulkPrice}
+                        onChange={(e) => setBulkPrice(e.target.value)}
+                        className="flex-1 min-w-0 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="whitespace-nowrap font-bold"
+                        onClick={() => handleBulkUpdate('additional_price')}
+                        disabled={!bulkPrice || isUpdatingCombination}
+                      >
+                        Set Price
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

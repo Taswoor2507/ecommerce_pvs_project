@@ -208,25 +208,25 @@ const VariantTypesStep = ({ productId, variants, basicProductData, onVariantsCha
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-bold text-slate-700 mb-2">
                 Options
               </label>
-              <div className="space-y-2">
-                <div className="flex gap-2">
+              <div className="space-y-3">
+                <div className="flex flex-col xs:flex-row gap-2">
                   <input
                     type="text"
                     value={currentOption}
                     onChange={(e) => setCurrentOption(e.target.value)}
                     onKeyPress={handleOptionKeyPress}
-                    placeholder="Add an option"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Add an option (e.g. Small)"
+                    className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     disabled={isAddingVariantType}
                   />
                   <button
                     type="button"
                     onClick={handleAddOption}
                     disabled={!currentOption.trim() || isAddingVariantType}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                    className="px-6 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all shadow-sm"
                   >
                     Add
                   </button>
