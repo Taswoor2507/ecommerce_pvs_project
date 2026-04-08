@@ -12,6 +12,7 @@ import { useProductDetail } from '../hooks/useProductDetail';
 import { useVariantMutation } from '../hooks/useVariantMutation';
 import { productsApi } from '../api/products.api';
 import toast from 'react-hot-toast';
+import { extractErrorMessage } from '../utils/errorExtractor';
 
 const AdminProductEditPage = () => {
   const { id } = useParams();
@@ -37,9 +38,7 @@ const AdminProductEditPage = () => {
       });
       toast.success('Product updated successfully');
     } catch (err) {
-      const message =
-        err?.response?.data?.message || err.message || 'Failed to update product';
-      toast.error(message);
+      toast.error(extractErrorMessage(err, 'Failed to update product'));
     } finally {
       setIsSaving(false);
     }

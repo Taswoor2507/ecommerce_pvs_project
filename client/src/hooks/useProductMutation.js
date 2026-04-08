@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api/products.api.js';
 import toast from 'react-hot-toast';
+import { extractErrorMessage } from '../utils/errorExtractor';
 
 /**
  * Custom hook for product mutations (create, update, delete)
@@ -28,10 +29,7 @@ export const useProductMutation = () => {
       return data;
     },
     onError: (error) => {
-      console.error('Create product error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to create product. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to create product');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
@@ -51,10 +49,7 @@ export const useProductMutation = () => {
       return data;
     },
     onError: (error) => {
-      console.error('Update product error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to update product. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to update product');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
@@ -71,10 +66,7 @@ export const useProductMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (error) => {
-      console.error('Delete product error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to delete product. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to delete product');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },

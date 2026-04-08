@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { variantsApi } from '../api/variants.api.js';
 import { combinationsApi } from '../api/combinations.api.js';
 import toast from 'react-hot-toast';
+import { extractErrorMessage } from '../utils/errorExtractor';
 
 /**
  * Custom hook for variant and combination mutations
@@ -29,10 +30,7 @@ export const useVariantMutation = (productId) => {
       return data;
     },
     onError: (error) => {
-      console.error('Add variant type error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to add variant type. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to add variant type');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
@@ -54,10 +52,7 @@ export const useVariantMutation = (productId) => {
       return data;
     },
     onError: (error) => {
-      console.error('Add option error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to add option. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to add option');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
@@ -78,10 +73,7 @@ export const useVariantMutation = (productId) => {
       return data;
     },
     onError: (error) => {
-      console.error('Delete variant type error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to delete variant type. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to delete variant type');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
@@ -102,10 +94,7 @@ export const useVariantMutation = (productId) => {
       return data;
     },
     onError: (error) => {
-      console.error('Delete option error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to delete option. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to delete option');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
@@ -128,10 +117,7 @@ export const useVariantMutation = (productId) => {
       return data;
     },
     onError: (error) => {
-      console.error('Update combination error:', error);
-      const errorMessage = error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to update combination. Please try again.';
+      const errorMessage = extractErrorMessage(error, 'Failed to update combination');
       setServerError(errorMessage);
       toast.error(errorMessage);
     },
