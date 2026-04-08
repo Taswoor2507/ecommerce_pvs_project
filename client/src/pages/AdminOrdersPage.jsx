@@ -15,7 +15,6 @@ const AdminOrdersPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const statusFilter = searchParams.get('status') || '';
   
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,7 +47,6 @@ const AdminOrdersPage = () => {
   } = useOrders({
     page: currentPage,
     limit: 10,
-    status: statusFilter,
   });
 
   const columns = [
@@ -157,21 +155,8 @@ const AdminOrdersPage = () => {
       </div>
 
       <Card padding={false}>
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-700">Recent Orders</h3>
-          <select 
-            className="text-sm border-slate-200 rounded-lg focus:ring-indigo-500"
-            value={statusFilter}
-            onChange={(e) => {
-              updateParams({ status: e.target.value, page: '1' });
-            }}
-          >
-            <option value="">All Status</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="pending">Pending</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-          </select>
         </div>
 
         <DataTable

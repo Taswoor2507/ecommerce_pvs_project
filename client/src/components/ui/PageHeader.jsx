@@ -23,30 +23,35 @@ const PageHeader = ({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${className}`}
+      className={`flex flex-col gap-4 md:flex-row md:items-center md:justify-between ${className}`}
     >
-      <div className="flex items-center gap-4 min-w-0">
+      <div className="flex items-start gap-3 md:gap-4 min-w-0">
         {(backTo || onBack) && (
           <Button
             variant="secondary"
             size="sm"
             onClick={handleBack}
+            className="flex-shrink-0"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {backLabel}
+            <ArrowLeft className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">{backLabel}</span>
           </Button>
         )}
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900 truncate">
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 truncate tracking-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-sm text-slate-500 mt-0.5 truncate">{subtitle}</p>
+            <p className="text-xs md:text-sm text-slate-500 mt-0.5 md:mt-1 truncate opacity-80">
+              {subtitle}
+            </p>
           )}
         </div>
       </div>
       {actions && (
-        <div className="flex items-center gap-3 flex-shrink-0">{actions}</div>
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap sm:flex-nowrap">
+          {actions}
+        </div>
       )}
     </div>
   );
