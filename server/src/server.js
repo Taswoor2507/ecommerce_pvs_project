@@ -19,7 +19,7 @@ async function startServer() {
       console.warn(': Redis is disabled');
     }
   } catch (err) {
-    console.warn(':  Redis unavailable — caching and locking disabled:', err.message);
+    // console.warn(':  Redis unavailable — caching and locking disabled:', err.message);
   }
 
   const server = app.listen(PORT, () => {
